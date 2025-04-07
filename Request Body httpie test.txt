@@ -1,0 +1,32 @@
+{
+  "responses": 
+[
+  
+{"questionNumber": 1, "answer":"Positive"},
+{"questionNumber": 2, "answer":"Yes"},
+{"questionNumber": 3, "answer":"Normal"},
+{"questionNumber": 4, "answer":"Low"},
+{"questionNumber": 5, "answer":"Negative"},
+{"questionNumber": 6, "answer":"No"},
+{"questionNumber": 7, "answer":"Yes"},
+{"questionNumber": 8, "answer":"Yes"},
+{"questionNumber": 9, "answer":"No"},
+{"questionNumber": 10, "answer":"Yes"},
+{"questionNumber": 11, "answer":"Yes"},
+{"questionNumber": 12, "answer":"Yes"},
+{"questionNumber": 13, "answer":"No"},
+{"questionNumber": 14, "answer":"No"},
+{"questionNumber": 15, "answer":"No"},
+{"questionNumber": 16, "answer":"Yes"},
+{"questionNumber": 17, "answer":"High"},
+{"questionNumber": 18, "answer":"Yes"},
+{"questionNumber": 19, "answer":"No"},
+{"questionNumber": 20, "answer":"Yes"},
+{"questionNumber": 21, "answer":"No"},
+{"questionNumber": 22, "answer":"Low"},
+{"questionNumber": 23, "answer":"Normal"},
+{"questionNumber": 24, "answer":"Yes"},
+{"questionNumber": 25, "answer":"Yes"}
+ 
+]
+}
