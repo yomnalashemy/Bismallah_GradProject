@@ -32,8 +32,8 @@ const userSchema = new mongoose.Schema({
         required: [true, "Email is required"],
         unique: true,
         lowercase: true,
-        minLength: 13,
-        maxLength: 255
+        minLength: 5,
+        maxLength: 320
     },
 
     gender: {

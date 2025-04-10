@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import {editProfile} from '../controllers/user.controller.js';
+import {editProfile, getProfile} from '../controllers/user.controller.js';
 import protect from '../middlewares/auth.middleware.js';
 const userRouter = Router();
 
@@ -62,5 +62,49 @@ const userRouter = Router();
  */
 
 userRouter.put('/profile', protect, editProfile); //entire resource
+
+/**
+ * @swagger
+ * /api/users/profile:
+ *   get:
+ *     summary: Display user profile
+ *     description: |
+ *       Allows the authenticated user to view their profile
+ *       - User Account
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Profile Fetched Successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 username:
+ *                   type: string
+ *                   example: "Rojena_2025"
+ *                 email:
+ *                   type: string
+ *                   example: "newrojenamohamaden@gmail.com"
+ *                 DateOfBirth:
+ *                   type: string
+ *                   format: date
+ *                   example: "2003-11-18"
+ *                 gender:
+ *                   type: string
+ *                   example: "Female"
+ *                 ethnicity:
+ *                   type: string
+ *                   example: "Caucasian"
+ *                 phoneNumber:
+ *                   type: string
+ *                   example: "+201145551358"
+ *       404:
+ *         description: User not found.
+ */
+
+
+userRouter.get('/profile', protect, getProfile);
 
 export default userRouter;
