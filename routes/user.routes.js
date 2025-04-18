@@ -70,6 +70,7 @@ userRouter.put('/profile', protect, editProfile); //entire resource
  *     summary: Display user profile
  *     description: |
  *       Allows the authenticated user to view their profile
+ *     tags:
  *       - User Account
  *     security:
  *       - bearerAuth: []

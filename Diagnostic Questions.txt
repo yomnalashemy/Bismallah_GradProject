@@ -1,11 +1,3 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import SymptomQuestion from '../models/symptomsQuestions.model.js';
-
-dotenv.config({path:`.env.${process.env.NODE_ENV || "development"}.local`});
-const { DB_URI } = process.env;
-await mongoose.connect(DB_URI); //كنت لازم احدد مسار الفايل عشان لوحدها بتجيب الجاهزة فسبب ايرور
-
 const questions = [
     {text: "(ANA) What is the result of your ANA (anti-nuclear antibody) lab test?", options:["Positive", "Negative"] },
     {text: "(Fever) Have you experienced unexplained, recurrent fever above 38°C (100.4°F)?", options:["Yes", "No"] },
@@ -37,16 +29,3 @@ const questions = [
     {text: "(Anti-Smith Antibody) Has any blood test shown positive for anti-Smith antibodies?", options:["Yes", "No"] },
     
 ]
-
-const formatted = questions.map((q, index) => ({
-    questionNumber: index + 1,
-    questionText : q.text, //كل سؤال يترقم صح ويتربط بسؤاله وده اسمهم في الريكويست
-    options: q.options
-
-}));
-
-await SymptomQuestion.deleteMany({});
-await SymptomQuestion.insertMany(formatted);
-
-console.log("Detection questions seeded!");
-process.exit();
