@@ -23,7 +23,7 @@ export const changePassword = async (req, res, next) => {
     }
 
     try {
-        const user = await User.findById(req.user._id).select('+password +authProvider');
+        const user = await User.findById(req.user._id).select('+password +authProvider'); //log in with google
 
         if (!user) {
             return res.status(404).json({ error: "User not found!" });
@@ -168,6 +168,26 @@ export const deleteAccount = async (req,res, next) => {
         });
     } catch (error) {
         next(error);
+    }
+};
+
+export const getProfile = async (req, res, next) => {
+    try {
+
+        const userId = req.user._id;
+        const user = await User.findById(userId).select('username DateOfBirth ethnicity email gender country phoneNumber');
+        if (!user) {    
+            res.status(404).json ({
+                error: "User not found"
+            })
+        }
+        res.status(200).json({
+            success: true,
+            data: user 
+        });
+    }
+    catch (error) {
+        next (error);
     }
 };
 
