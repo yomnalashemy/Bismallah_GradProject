@@ -1,6 +1,6 @@
 import SymptomQuestion from '../models/symptomsQuestions.model.js';
 import SymptomResponse from '../models/symptomsResponse.model.js';
-
+import axios from 'axios';
 export const getAllQuestions = async (req, res, next) => {
     try {
       const questions = await SymptomQuestion.find().sort({ questionNumber: 1 }); //Sorts AESCENDINGLY
@@ -72,3 +72,6 @@ export const getAllQuestions = async (req, res, next) => {
     }
   };
   
+export const diagnosis = async (req, res, next) => {
+
+}

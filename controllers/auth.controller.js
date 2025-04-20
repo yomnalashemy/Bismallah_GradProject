@@ -19,9 +19,8 @@ export const signUp = async (req, res, next) => {
         // Check if user already exists, by email or phone number
         const existingUser = await User.findOne({$or:[{email}, {phoneNumber}]}); // Find the one document with that email
         if(existingUser){
-            const error = new Error("User already exists");
-            error.statusCode = 409;
-            throw error;
+            return res.status(409).json({ error: "User already exists" });
+            
         }
     
 
@@ -51,9 +50,8 @@ export const signUp = async (req, res, next) => {
 
         //check if Passwords match
         if(password!==confirmPassword) {
-           const error = new Error("Passwords don't match!");
-           error.statusCode = 400;
-           throw error;
+            return res.status(400).json({ error: "Passwords don't match!" });
+    
         }
 
         if (!password || password.length < 8) {
@@ -137,9 +135,8 @@ export const logIn = async (req, res, next) => {
         const user = await User.findOne({email});
 
         if(!user){
-            const error = new Error("User Not Found");
-            error.statusCode = 401;
-            throw error;
+            return res.status(401).json({ error: "User Not Found" })
+            
         }
         
         if (user.authProvider !== "local") {
@@ -150,9 +147,8 @@ export const logIn = async (req, res, next) => {
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if(!isPasswordValid) {
-            const error = new Error('Invalid password');
-            error.statusCode = 401;
-            throw error;
+            return res.status(401).json({ error: "Invalid password" });
+
           }
           const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
         
