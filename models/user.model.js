@@ -38,13 +38,17 @@ const userSchema = new mongoose.Schema({
 
     gender: {
         type: String,
-        required: [true, "This field is required"],
+        required: function () {
+            return this.authProvider === 'local'
+        },
         options:[String]
     },
 
     password: {
         type: String,
-        required: [true, "Password is required"],
+        required: function () {
+            return this.authProvider === 'local'
+        },
         minLength:8,
         validate: {
             validator: function (value) {
@@ -56,14 +60,18 @@ const userSchema = new mongoose.Schema({
 
     country: {
         type: String,
-        required: [true, "Country is required"],
+        required: function () {
+            return this.authProvider === 'local'
+        },
         options:[String]
         
     },
 
     DateOfBirth: {
         type: Date,
-        required: [true, "Date of Birth is required"],
+        required: function () {
+            return this.authProvider === 'local'
+        },
         validate: {
             validator: function (value) {
                 const today = new Date();
@@ -77,7 +85,9 @@ const userSchema = new mongoose.Schema({
         type: String,  // Use String to prevent issues with leading zeros
         unique: true,
         trim: true,
-        required: [true, "Phone number is required"],
+        required: function () {
+            return this.authProvider === 'local'
+        },
         validate: {
             validator: function (value) {
                 const PhoneNumber = parsePhoneNumberFromString(value);
@@ -87,9 +97,16 @@ const userSchema = new mongoose.Schema({
         },
     },
 
+    profileCompleted: {
+        type: Boolean,
+        default: false  //redirection to the profile completion page
+    },
+
     ethnicity: {  
         type: String,
-        required: [true, "This field is required"],
+        required: function () {
+            return this.authProvider === 'local'
+        },
         options:[String],
         trim: true,
     },
@@ -148,7 +165,7 @@ userSchema.pre("save", async function (next) {
             session.endSession();
             next();
         } catch(error) {
-        await session.abortTransaction();
+    
         session.endSession();
         next(error);
     }

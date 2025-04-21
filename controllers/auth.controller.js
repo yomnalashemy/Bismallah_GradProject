@@ -1,10 +1,13 @@
 import mongoose from 'mongoose';
+import { OAuth2Client } from 'google-auth-library';
 import User from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import {sendWelcomeEmail} from '../utils/emailService.js';
 import { parsePhoneNumberFromString } from 'libphonenumber-js'; // FOR VALID PHONE NUMBERS
-import {JWT_SECRET, JWT_EXPIRES_IN} from '../config/env.js';
+import {JWT_SECRET, JWT_EXPIRES_IN, GOOGLE_CLIENT_ID} from '../config/env.js';
+
+const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 export const signUp = async (req, res, next) => {
     // يا كله يتنفذ يا كله ميتنفذش
@@ -128,6 +131,75 @@ export const signUp = async (req, res, next) => {
 
 }
 
+export const googleSignUp = async (req, res, next) => {
+    try {
+      const { tokenId } = req.body;
+      const ticket = await client.verifyIdToken({
+        idToken: tokenId,
+        audience: GOOGLE_CLIENT_ID
+      });
+      const payload = ticket.getPayload();
+      const { sub, email, name } = payload;
+    
+      const username = name ? name.replace(/\s+/g, '_') : email.split('@')[0];
+  
+      const existing = await User.findOne({ email });
+      if (existing) {
+        return res.status(409).json({ error: "User already exists. Please log in." });
+      }
+  
+      const user = new User({
+        username: name.replace(/\s+/g, '_'),
+        email,
+        authProvider: "google",
+        googleId: sub
+      });
+  
+      await user.save();
+  
+      const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  
+      res.status(201).json({
+        success: true,
+        message: "Signed up with Google",
+        data: { token, user }
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+export const googleLogIn = async (req, res, next) => {
+    try {
+        const { tokenId } = req.body;
+        const ticket = await client.verifyIdToken({
+          idToken: tokenId,
+          audience: GOOGLE_CLIENT_ID
+        });
+        const payload = ticket.getPayload();
+        const { email } = payload;
+    
+        const user = await User.findOne({ email });
+    
+        if (!user || user.authProvider !== 'google') {
+          return res.status(404).json({ error: "Google user not found. Please sign up." });
+        }
+    
+        const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+    
+        res.status(200).json({
+          success: true,
+          message: "Logged in with Google",
+          data: { token, user }
+        });
+      } catch (err) {
+        next(err);
+      }
+    };
+
+export const facebookSignUp = async (req, res, next) => {
+
+}
+export const facebookLogIn = async (req, res, next) => {}
 export const logIn = async (req, res, next) => {
     try{
 

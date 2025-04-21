@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import {signUp, logIn, logOut} from '../controllers/auth.controller.js';
+import {signUp, googleSignUp, googleLogIn, facebookSignUp, facebookLogIn, logIn, logOut} from '../controllers/auth.controller.js';
 import {changePassword, forgotPassword, resetPassword, deleteAccount} from '../controllers/user.controller.js';
 import protect from '../middlewares/auth.middleware.js';
 const authRouter = Router();
@@ -197,7 +197,7 @@ authRouter.patch('/password', protect, changePassword); //Part of resource
  *             - New password must include at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.
  */
 
-authRouter.post('/password/forgot', protect, forgotPassword);
+authRouter.post('/password/forgot', forgotPassword);
 
 /**
  * @swagger
@@ -241,7 +241,7 @@ authRouter.post('/password/forgot', protect, forgotPassword);
  *             - Reset token has expired.
  */
 
-authRouter.post('/password/reset', protect, resetPassword);
+authRouter.post('/password/reset', resetPassword);
 
 /**
  * @swagger
@@ -261,4 +261,9 @@ authRouter.post('/password/reset', protect, resetPassword);
  */
 authRouter.delete('/delete', protect, deleteAccount );
 
+
+authRouter.post('/google/signup', googleSignUp);
+authRouter.post('/google/login', googleLogIn);
+authRouter.post('/facebook/signup', facebookSignUp);
+authRouter.post('/facebook/login', facebookLogIn);
 export default authRouter;
