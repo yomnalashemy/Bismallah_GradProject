@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import {signUp, googleSignUp, googleLogIn, facebookSignUp, facebookLogIn, logIn, logOut} from '../controllers/auth.controller.js';
+import {signUp, logIn, logOut} from '../controllers/auth.controller.js';
 import {changePassword, forgotPassword, resetPassword, deleteAccount} from '../controllers/user.controller.js';
 import protect from '../middlewares/auth.middleware.js';
 const authRouter = Router();
@@ -262,8 +262,5 @@ authRouter.post('/password/reset', resetPassword);
 authRouter.delete('/delete', protect, deleteAccount );
 
 
-authRouter.post('/google/signup', googleSignUp);
-authRouter.post('/google/login', googleLogIn);
-authRouter.post('/facebook/signup', facebookSignUp);
-authRouter.post('/facebook/login', facebookLogIn);
+
 export default authRouter;
