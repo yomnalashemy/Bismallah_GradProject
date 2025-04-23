@@ -26,6 +26,12 @@ const symptomResponseSchema = new mongoose.Schema({
     type: [responseSchema],
     required: true
   },
+
+  result: {
+    type: Number, // 0 or 1 or 2 or 3 or 4 or 5
+    required: true
+  },
+
   submittedAt: {
     type: Date,
     default: Date.now
