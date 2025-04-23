@@ -149,17 +149,17 @@ authRouter.post('/logout', protect, logOut);
  *                 type: string
  *                 example: "11AbdelKader_rojena"
  *     responses:
+ *       401:
+ *         description: Old password is incorrect
  *       200:
- *         description: Password reset email sent successfully. Please check your inbox.
- *       404:
- *         description: User with this email does not exist.
- *       500:
- *         description: Failed to send reset email. Please try again.
+ *         description: Password updated successfully
  *       400:
- *         description: "Bad request - Possible causes:
- *           - Email is required."
+ *         description: > 
+ *           Bad request - Possible causes:
+ *             - Please provide old password, new password, and confirm the new password.
+ *             - New passwords do not match
+ *             - New password must include at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.
  */
-
 authRouter.patch('/password', protect, changePassword); //Part of resource
 
 /**
@@ -185,18 +185,16 @@ authRouter.patch('/password', protect, changePassword); //Part of resource
  *                 type: string
  *                 example: "rojenamohamaden@gmail.com"
  *     responses:
- *       401:
- *         description: Old password is incorrect
  *       200:
- *         description: Password updated successfully
+ *         description: Password reset email sent successfully. Please check your inbox.
+ *       404:
+ *         description: User with this email does not exist.
+ *       500:
+ *         description: Failed to send reset email. Please try again.
  *       400:
- *         description: > 
- *           Bad request - Possible causes:
- *             - Please provide old password, new password, and confirm the new password.
- *             - New passwords do not match
- *             - New password must include at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.
+ *         description: "Bad request - Possible causes:
+ *           - Email is required."
  */
-
 authRouter.post('/password/forgot', forgotPassword);
 
 /**
@@ -230,7 +228,7 @@ authRouter.post('/password/forgot', forgotPassword);
  *                 example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE1MjAsImlhdCI6MTc0MzYxMDI3OSwiZXhwIjoxNzQzNjEzODc5fQ.ClYC8qtYuUc1QOsWbzgW0NDLTU0awTt5XjyvldqpLjk"
  *     responses:
  *       200:
- *         description: Password updated successfully. You can now log in with your new password.
+ *         description: Password reset successfully. You can now log in with your new password.
  *       400:
  *         description: >
  *           Bad request - Possible causes:
