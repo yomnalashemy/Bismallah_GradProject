@@ -94,7 +94,7 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
     
     const renalBiopsyClass = encode(answerMap[19]) === 1
       ? {
-          "Class 1": 1, "Class 2": 2, "Class 3": 3, "Class 4": 4, "Class 5": 5
+         "Class 2": 2, "Class 3": 3, "Class 4": 4, "Class 5": 5
         }[answerMap[20]] || 0
       : 0;
 

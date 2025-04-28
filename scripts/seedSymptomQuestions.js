@@ -27,7 +27,7 @@ const questions = [
     {text: "(Proteinuria) After doing the Urine test. What is the protein levels result?", options:["High", "Normal"] },
     {text: "(Renal Biopsy Lupus Nephritis) Has a kidney biopsy shown any mild to moderate changes or significant to any changes?", options:["Yes", "No"] },
     {text: "(Renal Biopsy Lupus Nephritis: Follow-Up) Do you know which class your biopsy showed? (Select one)", 
-        options:["Class 1", "Class 2", "Class 3", "Class 4", "Class 5"] },
+        options:["Class 2", "Class 3", "Class 4", "Class 5"] },
     {text: "(Anti-cardiolipin Antibodies) Has any blood test shown positive for anticardiolipin antibodies?", options:["Yes", "No"] },
     {text: "(Anti-B2GP1 Antibodies) Has any blood test shown positive for anti-β2GP1 antibodies?", options:["Yes", "No"] },
     {text: "(Lupus Anticoagulant) Has any blood test shown positive for lupus anticoagulant?", options:["Yes", "No"] },
