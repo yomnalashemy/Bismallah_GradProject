@@ -69,15 +69,6 @@ export const forgotPassword = async (req, res, next) => {
         // Generate a unique reset token
         const resetToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "1h" });
 
-        // Store the token in the database with an expiration time
-        user.resetPasswordToken = resetToken;
-        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour expiry
-        await user.save();
-        console.log("Token saved:", resetToken);
-        const savedUser = await User.findOne({ email });
-        console.log("DB now has token:", savedUser.resetPasswordToken);
-
-
 
         // Send reset email
         try {
@@ -97,10 +88,17 @@ export const forgotPassword = async (req, res, next) => {
 
 export const resetPassword = async (req, res, next) => {
     try {
-      const { newPassword, confirmNewPassword, token } = req.body;
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Unauthorized, no token provided." });
+       }
+
+      const token = authHeader.split(' ')[1];
+      const { newPassword, confirmNewPassword } = req.body;
   
       if (!token || !newPassword || !confirmNewPassword) {
-        return res.status(400).json({ error: "New password is required." });
+        return res.status(400).json({ error: "Token and new passwords are required." });
       }
   
       if (newPassword !== confirmNewPassword) {
@@ -123,6 +121,11 @@ export const resetPassword = async (req, res, next) => {
       }
   
       const user = await User.findById(decoded.userId);
+
+      user.resetPasswordToken = token;
+      user.resetPasswordExpires = Date.now() + 3600000;
+      await user.save();
+
   
       if (!user || user.resetPasswordToken !== token) {
         return res.status(400).json({ error: "Invalid or expired reset token." });

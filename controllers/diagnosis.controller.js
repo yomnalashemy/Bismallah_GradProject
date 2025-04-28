@@ -148,7 +148,7 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
       Proteinuria: encodedInputs[15],
       Renal_biopsy: encodedInputs[16],
       Renal_biopsy_class: encodedInputs[17],
-      anti_cardiolipin_antibody: encodedInputs[18],  //كتبتها غلط عشان اعرف اعمل تيستينج عشان حسن محمد عبد السلام عفيفي البنا كاتبها كده
+      anti_cardiolipin_anitbody: encodedInputs[18],  //كتبتها غلط عشان اعرف اعمل تيستينج عشان حسن محمد عبد السلام عفيفي البنا كاتبها كده
       anti_b2gp1_antibody: encodedInputs[19],  
       lupus_anticoagulant: encodedInputs[20],
       low_c3: encodedInputs[21],
