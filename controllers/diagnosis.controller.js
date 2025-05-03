@@ -89,7 +89,9 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
       skinLupusScore = 2;
     } else if (discoid === 1 && subacute === 1 && acute === 1) {
       skinLupusScore = 2;
-    }
+    } else if (discoid === 0 && subacute === 0 && acute === 0) {
+      skinLupusScore = 0;
+    }   
 
     
     const renalBiopsyClass = encode(answerMap[19]) === 1

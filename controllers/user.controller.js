@@ -254,6 +254,11 @@ export const editProfile = async (req, res, next) => {
             user.phoneNumber = phoneNumber;
         }
 
+        const existingUser = await User.findOne({ phoneNumber });
+            if (existingUser) {
+                return res.status(409).json({ error: 'Phone Number already exists.' });
+            }
+
         // Other fields
         if (DateOfBirth) {
             const dobDate = new Date(DateOfBirth);
