@@ -197,7 +197,7 @@ export const getProfile = async (req, res, next) => {
 export const editProfile = async (req, res, next) => {
     try {
     const userId = req.user._id; // From the JWT payload
-    const {username, email, DateOfBirth, gender, ethnicity, phoneNumber} = req.body;
+    const {username, email, DateOfBirth, gender, ethnicity, phoneNumber, country} = req.body;
     const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ error: 'User not found.' });
@@ -273,6 +273,7 @@ export const editProfile = async (req, res, next) => {
         
         if (gender) user.gender = gender;
         if (ethnicity) user.ethnicity = ethnicity;
+        if (country) user.country = country;
 
         await user.save();
 
@@ -286,6 +287,7 @@ export const editProfile = async (req, res, next) => {
                 gender: user.gender,
                 ethnicity: user.ethnicity,
                 phoneNumber: user.phoneNumber,
+                country: user.country
             }
         });
     } catch (error) {
