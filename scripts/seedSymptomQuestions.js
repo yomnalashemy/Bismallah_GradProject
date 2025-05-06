@@ -60,15 +60,15 @@ const questions = [
     {text: "Has any blood test shown positive for anti-dsDNA antibodies?", options:["Yes", "No"],
       explanation: "These are specific antibodies that are very characteristic of lupus. The answer of this question must found in your anti-dsDNA ELISA test. "},
     {text: "Has any blood test shown positive for anti-Smith antibodies?", options:["Yes", "No"],
-      explanation: "These antibodies are highly specific for lupus if present. The answer of this question must found in your anti-Smith ELISA test."},
+      text: "These antibodies are highly specific for lupus if present. The answer of this question must found in your anti-Smith ELISA test."},
     
 ]
 
 const formatted = questions.map((q, index) => ({
     questionNumber: index + 1,
     questionText : q.text, //كل سؤال يترقم صح ويتربط بسؤاله وده اسمهم في الريكويست
-    options: q.options
-
+    options: q.options,
+    explanation: q.explanation || null
 }));
 
 await SymptomQuestion.deleteMany({});

@@ -14,8 +14,11 @@ const symptomQuestionSchema = new mongoose.Schema({
    type: [String], 
   required: true,
   category: String 
-  
   },
+  explanation: {
+    type: String, // <== ADD THIS LINE
+    default: null
+  }
 }, { timestamps: true }, {autoIndex: false});
 
 const SymptomQuestion = mongoose.model('SymptomQuestion', symptomQuestionSchema);
