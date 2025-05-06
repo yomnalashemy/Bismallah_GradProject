@@ -90,9 +90,9 @@ diagnosisRouter.get('/history', protect, getDetectionHistory);
  * /api/symptoms/submit:
  *   post:
  *     summary: Submit symptom responses and get a lupus diagnosis
- *     description: 
- *       Submits 27 user responses (all mandatory except Q20), encodes them, sends them to the AI diagnosis model, receives the result, and saves the submission.
- *       - Q20 is required **only if** Q19 = "Yes".
+ *     description: >
+ *       Submits 27 user responses (all mandatory except Q20), encodes them, sends them to the AI diagnosis model, receives the result, and saves the submission.  
+ *       - Q20 is required **only if** Q19 = "Yes".  
  *       - The AI model returns 0 or 1 (Not Likely / Likely Lupus).
  *     tags:
  *       - Symptom Detection
@@ -146,11 +146,12 @@ diagnosisRouter.get('/history', protect, getDetectionHistory);
  *                       type: integer
  *                       example: 1
  *       400:
- *         description: Bad request - Possible causes:
- *           - Missing required question (Q1–Q27 except Q20)
- *           - Q20 missing when Q19 = Yes
- *           - Invalid answer for a question
- *           - Unknown question number
+ *         description: >
+ *           Bad request - Possible causes:  
+ *           • Missing required question (Q1–Q27 except Q20)  
+ *           • Q20 missing when Q19 = Yes  
+ *           • Invalid answer for a question  
+ *           • Unknown question number
  *         content:
  *           application/json:
  *             schema:
@@ -168,7 +169,9 @@ diagnosisRouter.get('/history', protect, getDetectionHistory);
  *               properties:
  *                 error:
  *                   type: string
- *                   example: Prediction error: Internal server error from AI model
+ *                   example: 
+ *                      Prediction error: Internal server error from AI model
  */
+
 diagnosisRouter.post('/detection', protect, submitResponsesAndDiagnose);
 export default diagnosisRouter;

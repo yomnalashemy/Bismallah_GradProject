@@ -174,7 +174,7 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
         success: true,
         message: "Diagnosis completed and saved",
         data: {
-          result: diagnosisResult === 1 ? "Likely Lupus" : "Not Likely Lupus",
+          result: diagnosisResult === 1 ? "Our analysis indicates a potential presence of lupus" : "You're all clear! No signs of lupus are detected.",
           code: diagnosisResult
         }
       });
