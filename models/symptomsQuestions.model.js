@@ -11,7 +11,7 @@ const symptomQuestionSchema = new mongoose.Schema({
     required: true
   },
   options: { 
-   type: [String], //CAPITAL LETTER S, RAKZEY B2A 3EEB  KEFAYA ERRORS
+   type: [String], 
   required: true,
   category: String 
   

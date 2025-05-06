@@ -87,12 +87,15 @@ diagnosisRouter.get('/history', protect, getDetectionHistory);
 
 /**
  * @swagger
- * /api/diagnosis/detection:
+ * /api/symptoms/submit:
  *   post:
- *     summary: Submit 27 symptom responses and receive lupus diagnosis
- *     description: Accepts 27 user responses, validates, encodes them into 24 features, sends to AI model, receives diagnosis result (0 or 1), stores it with answers, and returns result.
+ *     summary: Submit symptom responses and get a lupus diagnosis
+ *     description: 
+ *       Submits 27 user responses (all mandatory except Q20), encodes them, sends them to the AI diagnosis model, receives the result, and saves the submission.
+ *       - Q20 is required **only if** Q19 = "Yes".
+ *       - The AI model returns 0 or 1 (Not Likely / Likely Lupus).
  *     tags:
- *       - Symptom Diagnosis
+ *       - Symptom Detection
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -106,7 +109,7 @@ diagnosisRouter.get('/history', protect, getDetectionHistory);
  *             properties:
  *               responses:
  *                 type: array
- *                 description: List of 27 symptom answers
+ *                 description: Array of 27 responses (Q20 is conditional)
  *                 items:
  *                   type: object
  *                   required:
@@ -118,7 +121,7 @@ diagnosisRouter.get('/history', protect, getDetectionHistory);
  *                       example: 1
  *                     answer:
  *                       type: string
- *                       example: "Positive"
+ *                       example: "Yes"
  *     responses:
  *       201:
  *         description: Diagnosis completed and saved
@@ -141,10 +144,13 @@ diagnosisRouter.get('/history', protect, getDetectionHistory);
  *                       example: "Likely Lupus"
  *                     code:
  *                       type: integer
- *                       enum: [0, 1]
  *                       example: 1
  *       400:
- *         description: Bad request - invalid submission format or content
+ *         description: Bad request - Possible causes:
+ *           - Missing required question (Q1–Q27 except Q20)
+ *           - Q20 missing when Q19 = Yes
+ *           - Invalid answer for a question
+ *           - Unknown question number
  *         content:
  *           application/json:
  *             schema:
@@ -152,9 +158,9 @@ diagnosisRouter.get('/history', protect, getDetectionHistory);
  *               properties:
  *                 error:
  *                   type: string
- *                   example: No responses submitted.
+ *                   example: Question 5 is required.
  *       500:
- *         description: Internal server error or AI API error
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:
@@ -162,7 +168,7 @@ diagnosisRouter.get('/history', protect, getDetectionHistory);
  *               properties:
  *                 error:
  *                   type: string
- *                   example: Internal Server Error
+ *                   example: Prediction error: Internal server error from AI model
  */
 diagnosisRouter.post('/detection', protect, submitResponsesAndDiagnose);
 export default diagnosisRouter;

@@ -3,10 +3,6 @@ import Counter from './counter.model.js'; // Import the Counter model
 import m2s from 'mongoose-to-swagger'; // FOR SWAGGER DOCS     وحسبي الله ونعم الوكيل ديه معروفة
 import { parsePhoneNumberFromString } from 'libphonenumber-js'; 
 
-// اهلا بيك في النسخة العربية من المبرمج الالي
-//  اسمي الزنجباري
-// سأقوم بعمل باك خالي من المشاكل ان شاء الله    
-
 const userSchema = new mongoose.Schema({
     _id: Number, //  User ID, separated from others
     
@@ -144,7 +140,7 @@ userSchema.pre("save", async function (next) {
     if (!this._id) {
         const session = await mongoose.startSession();
         try {
-            await session.withTransaction(async () => { //3ashan el counter may3desh we howa el user mat3mlesh 3eeb b2a dah mesh sho8el counters
+            await session.withTransaction(async () => { //3ashan el counter may3desh we howa el user non existent
                 //8eyrtaha badel "startTransaction" to "withTransaction"
                 const countryCode = getCountryCode(this.phoneNumber);
 

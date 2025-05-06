@@ -18,7 +18,6 @@ const responseSchema = new mongoose.Schema({
 const symptomResponseSchema = new mongoose.Schema({
   user: {
     type: Number, //CUSTOM ID NOT OBJECT ID
-    // كان سبب ايرور في التيست حسبي الله ونعم الوكيل
     ref: 'User',
     required: true
   },

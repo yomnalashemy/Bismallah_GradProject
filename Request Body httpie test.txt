@@ -21,7 +21,7 @@
 {"questionNumber": 17, "answer":"Yes"},
 {"questionNumber": 18, "answer":"High"},
 {"questionNumber": 19, "answer":"Yes"},
-{"questionNumber": 20, "answer":"Class 1"},
+{"questionNumber": 20, "answer":"Class 2"},
 {"questionNumber": 21, "answer":"Yes"},
 {"questionNumber": 22, "answer":"No"},
 {"questionNumber": 23, "answer":"No"},

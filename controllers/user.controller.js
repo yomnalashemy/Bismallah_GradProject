@@ -228,7 +228,7 @@ export const editProfile = async (req, res, next) => {
                 return res.status(400).json({ error: 'Invalid email format.' });
             }
 
-            const existingEmailUser = await User.findOne({ email });
+        const existingEmailUser = await User.findOne({ email });
             if (existingEmailUser) {
                 return res.status(409).json({ error: 'Email is already in use.' });
             }
@@ -251,14 +251,18 @@ export const editProfile = async (req, res, next) => {
             if (!parsedPhone || !parsedPhone.isValid()) {
                 return res.status(400).json({ error: 'Invalid phone number format.' });
             }
+        
+            // 🛠️ ADD THIS CHECK FIRST
+            if (user.phoneNumber !== phoneNumber) {
+                const existingPhoneUser = await User.findOne({ phoneNumber });
+                if (existingPhoneUser) {
+                    return res.status(409).json({ error: 'Phone Number already exists.' });
+                }
+            }
+        
             user.phoneNumber = phoneNumber;
         }
-
-        const existingUser = await User.findOne({ phoneNumber });
-            if (existingUser) {
-                return res.status(409).json({ error: 'Phone Number already exists.' });
-            }
-
+        
         // Other fields
         if (DateOfBirth) {
             const dobDate = new Date(DateOfBirth);
