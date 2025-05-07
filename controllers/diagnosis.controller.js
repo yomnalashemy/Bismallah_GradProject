@@ -19,7 +19,7 @@ export const getAllQuestions = async (req, res, next) => {
       const formatted = history.map(entry => ({
         date: entry.submittedAt,
         result: entry.result, 
-        resultLabel: entry.result === 1 ? "Likely Lupus" : "Not Likely Lupus", 
+        resultLabel: entry.result === 1 ? "Lupus signs detected" : "No lupus signs are detected",
         responses: entry.responses.map(r => ({
           question: r.questionText,
           answer: r.answer

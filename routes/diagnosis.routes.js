@@ -87,7 +87,7 @@ diagnosisRouter.get('/history', protect, getDetectionHistory);
 
 /**
  * @swagger
- * /api/symptoms/submit:
+ * /api/diagnosis/detection:
  *   post:
  *     summary: Submit symptom responses and get a lupus diagnosis
  *     description: >
@@ -141,7 +141,7 @@ diagnosisRouter.get('/history', protect, getDetectionHistory);
  *                   properties:
  *                     result:
  *                       type: string
- *                       example: "Likely Lupus"
+ *                       example: "You're all clear! No signs of lupus are detected."
  *                     code:
  *                       type: integer
  *                       example: 1
@@ -172,6 +172,5 @@ diagnosisRouter.get('/history', protect, getDetectionHistory);
  *                   example: 
  *                      Prediction error: Internal server error from AI model
  */
-
 diagnosisRouter.post('/detection', protect, submitResponsesAndDiagnose);
 export default diagnosisRouter;
