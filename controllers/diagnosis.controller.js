@@ -2,6 +2,7 @@ import SymptomQuestion from '../models/symptomsQuestions.model.js';
 import SymptomResponse from '../models/symptomsResponse.model.js';
 import axios from 'axios';
 import { AI_API_URL } from '../config/env.js';
+
 export const getAllQuestions = async (req, res, next) => {
     try {
       const questions = await SymptomQuestion.find().sort({ questionNumber: 1 }); //Sorts AESCENDINGLY
@@ -33,8 +34,23 @@ export const getAllQuestions = async (req, res, next) => {
     }
   };
   
+// Retry utility: Retries a request function up to 'retries' times with 'delay' in ms
+async function retryRequest(fn, retries = 3, delay = 2000) {
+  let lastError;
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn(); // attempt the request
+    } catch (err) {
+      lastError = err;
+      if (i < retries - 1) {
+        await new Promise(res => setTimeout(res, delay)); // wait before retrying
+      }
+    }
+  }
+  throw lastError; // throw after all retries fail
+}
 
-  export const submitResponsesAndDiagnose = async (req, res, next) => {
+export const submitResponsesAndDiagnose = async (req, res, next) => {
     try {
       const userId = req.user._id;
       const submitted = req.body.responses;
@@ -130,7 +146,8 @@ export const getAllQuestions = async (req, res, next) => {
         encode(answerMap[27])
       ];
   
-      const aiResponse = await axios.post(`${AI_API_URL}/predict`, {
+      const aiResponse = await retryRequest(() =>
+        axios.post(`${AI_API_URL}/predict`, {
         Ana_test: encodedInputs[0],
         Fever: encodedInputs[1],
         Leukopenia: encodedInputs[2],
@@ -156,7 +173,7 @@ export const getAllQuestions = async (req, res, next) => {
         low_c4: encodedInputs[22],
         anti_dsDNA_antibody: encodedInputs[23],
         anti_smith_antibody: encodedInputs[24]
-      });
+      }));
   
       const diagnosisResult = aiResponse.data.prediction;
   
