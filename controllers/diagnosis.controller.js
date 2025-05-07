@@ -1,6 +1,7 @@
 import SymptomQuestion from '../models/symptomsQuestions.model.js';
 import SymptomResponse from '../models/symptomsResponse.model.js';
 import axios from 'axios';
+import { AI_API_URL } from '../config/env.js';
 export const getAllQuestions = async (req, res, next) => {
     try {
       const questions = await SymptomQuestion.find().sort({ questionNumber: 1 }); //Sorts AESCENDINGLY
@@ -33,17 +34,15 @@ export const getAllQuestions = async (req, res, next) => {
   };
   
 
-  
-export const submitResponsesAndDiagnose = async (req, res, next) => {
+  export const submitResponsesAndDiagnose = async (req, res, next) => {
     try {
       const userId = req.user._id;
-      const submitted = req.body.responses; // [{ questionNumber, answer }]
+      const submitted = req.body.responses;
   
       if (!Array.isArray(submitted) || submitted.length === 0) {
         return res.status(400).json({ error: "No responses submitted." });
       }
   
-      // Check required questions
       const requiredQuestions = Array.from({ length: 27 }, (_, i) => i + 1).filter(q => q !== 20);
       const submittedMap = new Map(submitted.map(r => [r.questionNumber, r.answer]));
   
@@ -53,13 +52,12 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
         }
       }
   
-      // Q20 required only if Q19 = "Yes"
       if (submittedMap.get(19) === "Yes" && !submittedMap.has(20)) {
         return res.status(400).json({ error: "Question 20 is required when question 19 is answered 'Yes'." });
       }
   
       const responses = [];
-      const answerMap = {}; // { questionNumber: answer }
+      const answerMap = {};
   
       for (const entry of submitted) {
         const q = await SymptomQuestion.findOne({ questionNumber: entry.questionNumber });
@@ -82,9 +80,9 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
   
       const encode = (val, pos = "Yes", one = 1, zero = 0) => val === pos ? one : zero;
   
-      const discoid = encode(answerMap[11]);   // Q11
-      const subacute = encode(answerMap[12]);  // Q12
-      const acute = encode(answerMap[13]);     // Q13
+      const discoid = encode(answerMap[11]);
+      const subacute = encode(answerMap[12]);
+      const acute = encode(answerMap[13]);
   
       let skinLupusScore = 0;
       if (discoid === 1 && subacute === 0 && acute === 0) skinLupusScore = 3;
@@ -132,7 +130,7 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
         encode(answerMap[27])
       ];
   
-      const aiResponse = await axios.post("https://lupira-ai-dnmi.onrender.com/predict", {
+      const aiResponse = await axios.post(`${AI_API_URL}/predict`, {
         Ana_test: encodedInputs[0],
         Fever: encodedInputs[1],
         Leukopenia: encodedInputs[2],
@@ -174,7 +172,9 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
         success: true,
         message: "Diagnosis completed and saved",
         data: {
-          result: diagnosisResult === 1 ? "Our analysis indicates a potential presence of lupus" : "You're all clear! No signs of lupus are detected.",
+          result: diagnosisResult === 1
+            ? "Our analysis indicates a potential presence of lupus"
+            : "You're all clear! No signs of lupus are detected.",
           code: diagnosisResult
         }
       });
@@ -182,4 +182,3 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
       next(error);
     }
   };
-  
