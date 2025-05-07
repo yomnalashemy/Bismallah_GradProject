@@ -178,7 +178,7 @@ export const getProfile = async (req, res, next) => {
     try {
 
         const userId = req.user._id;
-        const user = await User.findById(userId).select('username DateOfBirth ethnicity email gender country phoneNumber');
+        const user = await User.findById(userId).select('username DateOfBirth ethnicity email gender country phoneNumber profilePicture');
         if (!user) {    
             res.status(404).json ({
                 error: "User not found"
@@ -202,6 +202,10 @@ export const editProfile = async (req, res, next) => {
         if (!user) {
             return res.status(404).json({ error: 'User not found.' });
         }
+
+        if (req.file && req.file.path) {
+            user.profilePicture = req.file.path; // Cloudinary URL
+          }
     
         if (username && username !== user.username) {
             if (username.length < 5) {
@@ -252,7 +256,7 @@ export const editProfile = async (req, res, next) => {
                 return res.status(400).json({ error: 'Invalid phone number format.' });
             }
         
-            // 🛠️ ADD THIS CHECK FIRST
+            // ADD THIS CHECK FIRST
             if (user.phoneNumber !== phoneNumber) {
                 const existingPhoneUser = await User.findOne({ phoneNumber });
                 if (existingPhoneUser) {
@@ -291,7 +295,8 @@ export const editProfile = async (req, res, next) => {
                 gender: user.gender,
                 ethnicity: user.ethnicity,
                 phoneNumber: user.phoneNumber,
-                country: user.country
+                country: user.country,
+                profilePicture: user.profilePicture,
             }
         });
     } catch (error) {

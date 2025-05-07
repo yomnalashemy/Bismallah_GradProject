@@ -106,6 +106,12 @@ const userSchema = new mongoose.Schema({
         options:[String],
         trim: true,
     },
+
+    profilePicture: {
+        type: String, // Store the image URL or path
+        default: ""   
+      },
+      
     googleId: String,
     facebookId: String,
     resetPasswordToken: String,

@@ -60,7 +60,7 @@ diagnosisRouter.get('/questions', protect, getAllQuestions);
  *                         example: 1
  *                       resultLabel:
  *                         type: string
- *                         example: "Likely Lupus"
+ *                         example: "Lupus signs detected"
  *                       responses:
  *                         type: array
  *                         items:

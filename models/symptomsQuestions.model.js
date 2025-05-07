@@ -16,7 +16,7 @@ const symptomQuestionSchema = new mongoose.Schema({
   category: String 
   },
   explanation: {
-    type: String, // <== ADD THIS LINE
+    type: String, 
     default: null
   }
 }, { timestamps: true }, {autoIndex: false});
