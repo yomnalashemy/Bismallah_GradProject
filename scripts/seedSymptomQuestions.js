@@ -42,7 +42,7 @@ const questions = [
     {text: "Do you have joint pain or swelling that moves from one joint to another?", options:["Yes", "No"],
       explanation: "Lupus commonly causes pain and swelling in joints, often moving from one joint to another."},
     {text: "After doing the Urine test. What is the protein levels result?", options:["High", "Normal"],
-      explanation: " This means protein is leaking into your urine, which can be a bad sign for the kidney."},
+      explanation: "This means protein is leaking into your urine, which can be a bad sign for the kidney."},
     {text: "Has a kidney biopsy shown any mild to moderate changes or significant to any changes?", options:["Yes", "No"],
       explanation: "A renal biopsy, also known as a kidney biopsy, is a medical procedure used to take a small sample of kidney tissue and examine it to know the kidney’s condition."},
     {text: "Which class your biopsy showed? (Select one)", 
