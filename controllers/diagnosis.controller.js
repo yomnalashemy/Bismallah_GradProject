@@ -1,7 +1,9 @@
 import SymptomQuestion from '../models/symptomsQuestions.model.js';
 import SymptomResponse from '../models/symptomsResponse.model.js';
 import axios from 'axios';
-import { AI_API_URL } from '../config/env.js';
+import dotenv from 'dotenv';
+dotenv.config({path:`.env.${process.env.NODE_ENV || "development"}.local`});
+const { AI_API_URL } = process.env;
 
 export const getAllQuestions = async (req, res, next) => {
     try {
