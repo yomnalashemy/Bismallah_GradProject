@@ -47,7 +47,7 @@ const questions = [
       explanation: "A renal biopsy, also known as a kidney biopsy, is a medical procedure used to take a small sample of kidney tissue and examine it to know the kidney’s condition."},
     {text: "Which class your biopsy showed? (Select one)", 
         options:["Class 2", "Class 3", "Class 4", "Class 5"],
-        explanation: "This is a follow-up to specify the biopsy class in case of presence." },
+        explanation: "This is a follow-up questions to specify the biopsy class in case of presence." },
     {text: "Has any blood test shown positive for anticardiolipin antibodies?", options:["Yes", "No"], 
       explanation: "These are specific antibodies that can increase risk of blood clots. The answer of this question must be found in your Solid-phase enzyme-linked immunosorbent assays (ELISA) test."},
     {text: "Has any blood test shown positive for anti-β2GP1 antibodies?", options:["Yes", "No"],

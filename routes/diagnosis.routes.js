@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import { getAllQuestions, getDetectionHistory } from '../controllers/diagnosis.controller.js';
+import { getAllQuestions, getDetectionHistory, submitResponsesAndDiagnose } from '../controllers/diagnosis.controller.js';
 import protect from '../middlewares/auth.middleware.js';
 const diagnosisRouter = Router();
 
@@ -172,5 +172,5 @@ diagnosisRouter.get('/history', protect, getDetectionHistory);
  *                   example: 
  *                      Prediction error: Internal server error from AI model
  */
-
+diagnosisRouter.post('/detection', protect, submitResponsesAndDiagnose);
 export default diagnosisRouter;
