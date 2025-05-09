@@ -63,7 +63,7 @@ export const sendWelcomeEmail = async (email, username) => {
 };
 
 export const sendResetPasswordEmail = async (email, username, resetToken) => {
-    const resetLink = `https://Lupira.com/reset-password/${resetToken}`;
+    const resetLink = `lupira://reset-password/${resetToken}`;
 
     const mailOptions = {
         from: `Lupira <${process.env.EMAIL_USER}>`,
