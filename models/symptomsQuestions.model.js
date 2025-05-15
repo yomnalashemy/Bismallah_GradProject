@@ -10,15 +10,27 @@ const symptomQuestionSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+ questionTextArabic: { 
+    type: String, 
+    required: true
+  },
   options: { 
    type: [String], 
-  required: true,
-  category: String 
+   required: true,
+   category: String 
+  },
+  optionTextArabic: { 
+    type: [String], 
+    required: true
   },
   explanation: {
     type: String, 
     default: null
-  }
+  },
+  explanationArabic: {
+    type: String, 
+    default: null
+  },
 }, { timestamps: true }, {autoIndex: false});
 
 const SymptomQuestion = mongoose.model('SymptomQuestion', symptomQuestionSchema);

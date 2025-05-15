@@ -123,7 +123,7 @@ export const resetPassword = async (req, res, next) => {
       const user = await User.findById(decoded.userId);
 
       user.resetPasswordToken = token;
-      user.resetPasswordExpires = Date.now() + 3600000;
+      user.resetPasswordExpires = Date.now() + 3600000; // 1 hour expiration
       await user.save();
 
   
