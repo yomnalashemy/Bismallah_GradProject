@@ -167,36 +167,36 @@ const questions = [
     explanationArabic: "هذا سؤال متابعة لتحديد فئة الخزعة في حالة وجودها."
   },
 
-    {text: "Has any blood test shown positive for anticardiolipin antibodies?", 
-     options:["Yes", "No"], 
-     explanation: "These are specific antibodies that can increase risk of blood clots. The answer of this question must be found in your Solid-phase enzyme-linked immunosorbent assays (ELISA) test.",
-     questioTextArabic: "هل أظهر أي اختبار دم إيجابي للأجسام المضادة للكارديوليبين؟",
-     optionsArabic: ["نعم", "لأ"],
-     explanationArabic: "هذه أجسام مضادة محددة يمكن أن تزيد من خطر الإصابة بجلطات الدم. يجب العثور على إجابة هذا السؤال في اختبار مقايسة الممتز المناعي الصلب المرتبط بالإنزيم (ELISA)."
-    },
+  {text: "Has any blood test shown positive for anticardiolipin antibodies?", 
+   options:["Yes", "No"], 
+   explanation: "These are specific antibodies that can increase risk of blood clots. The answer of this question must be found in your Solid-phase enzyme-linked immunosorbent assays (ELISA) test.",
+   questioTextArabic: "هل أظهر أي اختبار دم إيجابي للأجسام المضادة للكارديوليبين؟",
+   optionsArabic: ["نعم", "لأ"],
+   explanationArabic: "هذه أجسام مضادة محددة يمكن أن تزيد من خطر الإصابة بجلطات الدم. يجب العثور على إجابة هذا السؤال في اختبار مقايسة الممتز المناعي الصلب المرتبط بالإنزيم (ELISA)."
+ },
 
-    {text: "Has any blood test shown positive for anti-β2GP1 antibodies?",
-     options:["Yes", "No"],
+  {text: "Has any blood test shown positive for anti-β2GP1 antibodies?",
+   options:["Yes", "No"],
      explanation: "These are antibodies that can also increase risk of blood clots. The answer of this question must be found in your Solid-phase enzyme-linked immunosorbent assays (ELISA) test.",
      questionTextArabic: "هل أظهر أي اختبار دم إيجابي للأجسام المضادة لـ β2GP1؟",
      optionsArabic: ["نعم", "لأ"],
      explanationArabic: "هذه أجسام مضادة يمكن أن تزيد أيضًا من خطر الإصابة بجلطات الدم. يجب العثور على إجابة هذا السؤال في اختبار مقايسة الممتز المناعي الصلب المرتبط بالإنزيم (ELISA)." 
     },
 
-    {text: "Has any blood test shown positive for lupus anticoagulant?",
-     options:["Yes", "No"], 
-     explanation: "This is another type of antibody that can increase risk of blood clots. The answer of this question must be found in your PTT, LA-sensitive PTT or dilute Russell viper venom test (DRVVT).",
-     questionTextArabic: "هل أظهر أي اختبار دم إيجابي لمضادات تخثر الذئبة؟",
-     optionsArabic: ["نعم", "لأ"],
-     explanationArabic: "هذا نوع آخر من الأجسام المضادة التي يمكن أن تزيد من خطر الإصابة بجلطات الدم. يجب العثور على إجابة هذا السؤال في اختبار PTT أو PTT الحساس لـ LA أو اختبار سم أفعى راسل المخفف (DRVVVT)."
-    },
+ {text: "Has any blood test shown positive for lupus anticoagulant?",
+  options:["Yes", "No"], 
+  explanation: "This is another type of antibody that can increase risk of blood clots. The answer of this question must be found in your PTT, LA-sensitive PTT or dilute Russell viper venom test (DRVVT).",
+  questionTextArabic: "هل أظهر أي اختبار دم إيجابي لمضادات تخثر الذئبة؟",
+  optionsArabic: ["نعم", "لأ"],
+  explanationArabic: "هذا نوع آخر من الأجسام المضادة التي يمكن أن تزيد من خطر الإصابة بجلطات الدم. يجب العثور على إجابة هذا السؤال في اختبار PTT أو PTT الحساس لـ LA أو اختبار سم أفعى راسل المخفف (DRVVVT)."
+  },
 
-    {text: "Following the total Complement Blood (CH50) test, what is your C3 protein result?", 
-    options:["Low", "Normal"],
-    explanation: "C3 is part of your immune system that its low levels can indicate active lupus. The answer of this question must be found in your CH50 test (sometimes called CH100 or a total complement test).",
-    questionTextArabic: "بعد اختبار الدم المكمل الكلي (CH50)، ما هي نتيجة بروتين C3؟",
-    optionsArabic: ["منخفض", "طبيعي"],
-    explanationArabic: "C3 هو جزء من جهازك المناعي الذي يمكن أن يشير انخفاض مستوياته إلى الإصابة بالذئبة النشطة. يجب العثور على إجابة هذا السؤال في اختبار CH50 (يُطلق عليه أحيانًا CH100 أو اختبار المكملات الكلية)."
+  {text: "Following the total Complement Blood (CH50) test, what is your C3 protein result?", 
+   options:["Low", "Normal"],
+   explanation: "C3 is part of your immune system that its low levels can indicate active lupus. The answer of this question must be found in your CH50 test (sometimes called CH100 or a total complement test).",
+   questionTextArabic: "بعد اختبار الدم المكمل الكلي (CH50)، ما هي نتيجة بروتين C3؟",
+   optionsArabic: ["منخفض", "طبيعي"],
+   explanationArabic: "C3 هو جزء من جهازك المناعي الذي يمكن أن يشير انخفاض مستوياته إلى الإصابة بالذئبة النشطة. يجب العثور على إجابة هذا السؤال في اختبار CH50 (يُطلق عليه أحيانًا CH100 أو اختبار المكملات الكلية)."
   },
 
   {text: "Following the total Complement Blood (CH50) test, What is your C4 protein result?", 
@@ -207,20 +207,20 @@ const questions = [
    explanationArabic: "على غرار C3، يمكن أن يشير انخفاض C4 إلى الإصابة بالذئبة النشطة. يجب العثور على إجابة هذا السؤال في اختبار CH50 (يُطلق عليه أحياناً CH100 أو اختبار المكملات الكلية)."
   },
 
-    {text: "Has any blood test shown positive for anti-dsDNA antibodies?",
-     options:["Yes", "No"],
-     explanation: "These are specific antibodies that are very characteristic of lupus. The answer of this question must found in your anti-dsDNA ELISA test.",
-     questionTextArabic: "هل أظهر أي اختبار دم إيجابي للأجسام المضادة للحمض النووي الريبي المنزوع الأكسجين؟",
-     optionsArabic: ["نعم", "لأ"],
-     explanationArabic: "هذه أجسام مضادة محددة مميزة جدًا لمرض الذئبة. يجب أن تكون إجابة هذا السؤال موجودة في اختبار مضادات الحمض النووي الريبي المنقوص الأكسجين (ELISA)."
-    },
+ {text: "Has any blood test shown positive for anti-dsDNA antibodies?",
+  options:["Yes", "No"],
+  explanation: "These are specific antibodies that are very characteristic of lupus. The answer of this question must found in your anti-dsDNA ELISA test.",
+  questionTextArabic: "هل أظهر أي اختبار دم إيجابي للأجسام المضادة للحمض النووي الريبي المنزوع الأكسجين؟",
+  optionsArabic: ["نعم", "لأ"],
+  explanationArabic: "هذه أجسام مضادة محددة مميزة جدًا لمرض الذئبة. يجب أن تكون إجابة هذا السؤال موجودة في اختبار مضادات الحمض النووي الريبي المنقوص الأكسجين (ELISA)."
+ },
 
-    {text: "Has any blood test shown positive for anti-Smith antibodies?", 
-    options:["Yes", "No"],
-    explanation: "These antibodies are highly specific for lupus if present. The answer of this question must found in your anti-Smith ELISA test.",
-    questionTextArabic: "هل أظهر أي اختبار دم إيجابي للأجسام المضادة لسميث؟",
-    optionsArabic: ["نعم", "لأ"],
-    explanationArabic: "هذه الأجسام المضادة محددة للغاية لمرض الذئبة في حالة وجودها. يجب أن تكون إجابة هذا السؤال موجودة في اختبار ELISA المضاد للذئبة."
+ {text: "Has any blood test shown positive for anti-Smith antibodies?", 
+  options:["Yes", "No"],
+  explanation: "These antibodies are highly specific for lupus if present. The answer of this question must found in your anti-Smith ELISA test.",
+  questionTextArabic: "هل أظهر أي اختبار دم إيجابي للأجسام المضادة لسميث؟",
+  optionsArabic: ["نعم", "لأ"],
+  explanationArabic: "هذه الأجسام المضادة محددة للغاية لمرض الذئبة في حالة وجودها. يجب أن تكون إجابة هذا السؤال موجودة في اختبار ELISA المضاد للذئبة."
   },
     
 ]
