@@ -51,12 +51,14 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const submitted = req.body.responses;
+    const lang = req.query.lang === 'ar' ? 'ar' : 'en';
+
+    const t = (en, ar) => lang === 'ar' ? ar : en;
 
     if (!Array.isArray(submitted) || submitted.length === 0) {
-      return res.status(400).json({ error: "No responses submitted." });
+      return res.status(400).json({ error: t("No responses submitted.", "لم يتم إرسال أي إجابات.") });
     }
 
-    // Translation map for Arabic to English
     const translateAnswer = (answer) => {
       const map = {
         "نعم": "Yes",
@@ -79,12 +81,18 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
 
     for (const qNum of requiredQuestions) {
       if (!submittedMap.has(qNum)) {
-        return res.status(400).json({ error: `Question ${qNum} is required.` });
+        return res.status(400).json({ error: t(
+          `Question ${qNum} is required.`,
+          `يجب الإجابة على السؤال رقم ${qNum}.`
+        )});
       }
     }
 
     if (submittedMap.get(19) === "Yes" && !submittedMap.has(20)) {
-      return res.status(400).json({ error: "Question 20 is required when question 19 is answered 'Yes'." });
+      return res.status(400).json({ error: t(
+        "Question 20 is required when question 19 is answered 'Yes'.",
+        "يجب الإجابة على السؤال 20 إذا كانت الإجابة على السؤال 19 هي 'نعم'."
+      )});
     }
 
     const responses = [];
@@ -94,9 +102,18 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
       const translatedAnswer = translateAnswer(entry.answer);
       const q = await SymptomQuestion.findOne({ questionNumber: entry.questionNumber });
 
-      if (!q) return res.status(400).json({ error: `Unknown question number: ${entry.questionNumber}` });
+      if (!q) {
+        return res.status(400).json({ error: t(
+          `Unknown question number: ${entry.questionNumber}`,
+          `رقم السؤال غير معروف: ${entry.questionNumber}`
+        )});
+      }
+
       if (!q.options.includes(translatedAnswer)) {
-        return res.status(400).json({ error: `Invalid answer for question: ${q.questionText}` });
+        return res.status(400).json({ error: t(
+          `Invalid answer for question: ${q.questionText}`,
+          `إجابة غير صالحة للسؤال: ${q.questionText}`
+        )});
       }
 
       responses.push({
@@ -107,7 +124,6 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
 
       answerMap[entry.questionNumber] = translatedAnswer;
     }
-
     const encode = (val, pos = "Yes", one = 1, zero = 0) => val === pos ? one : zero;
 
     const discoid = encode(answerMap[11]);
