@@ -52,7 +52,6 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
     const userId = req.user._id;
     const submitted = req.body.responses;
     const lang = req.query.lang === 'ar' ? 'ar' : 'en';
-
     const t = (en, ar) => lang === 'ar' ? ar : en;
 
     if (!Array.isArray(submitted) || submitted.length === 0) {
@@ -201,7 +200,6 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
       result: diagnosisResult
     }).save();
 
-    const lang = req.query.lang === 'ar' ? 'ar' : 'en';
     const message = diagnosisResult === 1
       ? (lang === 'ar' ? "تحليلنا يشير إلى احتمالية وجود الذئبة" : "Our analysis indicates a potential presence of lupus")
       : (lang === 'ar' ? "كل شيء سليم! لم يتم الكشف عن علامات الذئبة" : "You're all clear! No signs of lupus are detected.");
