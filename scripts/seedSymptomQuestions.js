@@ -170,18 +170,18 @@ const questions = [
   {text: "Has any blood test shown positive for anticardiolipin antibodies?", 
    options:["Yes", "No"], 
    explanation: "These are specific antibodies that can increase risk of blood clots. The answer of this question must be found in your Solid-phase enzyme-linked immunosorbent assays (ELISA) test.",
-   questioTextArabic: "هل أظهر أي اختبار دم إيجابي للأجسام المضادة للكارديوليبين؟",
+   questionTextArabic: "هل أظهر أي اختبار دم إيجابي للأجسام المضادة للكارديوليبين؟",
    optionsArabic: ["نعم", "لأ"],
    explanationArabic: "هذه أجسام مضادة محددة يمكن أن تزيد من خطر الإصابة بجلطات الدم. يجب العثور على إجابة هذا السؤال في اختبار مقايسة الممتز المناعي الصلب المرتبط بالإنزيم (ELISA)."
  },
 
   {text: "Has any blood test shown positive for anti-β2GP1 antibodies?",
    options:["Yes", "No"],
-     explanation: "These are antibodies that can also increase risk of blood clots. The answer of this question must be found in your Solid-phase enzyme-linked immunosorbent assays (ELISA) test.",
-     questionTextArabic: "هل أظهر أي اختبار دم إيجابي للأجسام المضادة لـ β2GP1؟",
-     optionsArabic: ["نعم", "لأ"],
-     explanationArabic: "هذه أجسام مضادة يمكن أن تزيد أيضًا من خطر الإصابة بجلطات الدم. يجب العثور على إجابة هذا السؤال في اختبار مقايسة الممتز المناعي الصلب المرتبط بالإنزيم (ELISA)." 
-    },
+   explanation: "These are antibodies that can also increase risk of blood clots. The answer of this question must be found in your Solid-phase enzyme-linked immunosorbent assays (ELISA) test.",
+   questionTextArabic: "هل أظهر أي اختبار دم إيجابي للأجسام المضادة لـ β2GP1؟",
+   optionsArabic: ["نعم", "لأ"],
+   explanationArabic: "هذه أجسام مضادة يمكن أن تزيد أيضًا من خطر الإصابة بجلطات الدم. يجب العثور على إجابة هذا السؤال في اختبار مقايسة الممتز المناعي الصلب المرتبط بالإنزيم (ELISA)." 
+  },
 
  {text: "Has any blood test shown positive for lupus anticoagulant?",
   options:["Yes", "No"], 
@@ -234,7 +234,6 @@ const formatted = questions.map((q, index) => ({
   explanation: q.explanation || null,
   explanationArabic: q.explanationArabic || null
 }));
-
 
 await SymptomQuestion.deleteMany({});
 await SymptomQuestion.insertMany(formatted);

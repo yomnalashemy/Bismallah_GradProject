@@ -27,26 +27,37 @@ export const getDetectionHistory = async (req, res, next) => {
   try {
     const lang = req.query.lang === 'ar' ? 'ar' : 'en';
     const userId = req.user._id;
+
     const history = await SymptomResponse.find({ user: userId }).sort({ submittedAt: -1 });
 
-    const formatted = history.map(entry => ({
-      date: entry.submittedAt,
-      result: entry.result,
-      resultLabel: entry.result === 1
-        ? (lang === 'ar' ? "تم رصد علامات تشير إلى الذئبة" : "Lupus signs detected")
-        : (lang === 'ar' ? "لم يتم رصد علامات الذئبة" : "No lupus signs are detected"),
-      responses: entry.responses.map(r => ({
-        question: r.questionText,
-        answer: r.answer
-      }))
-    }));
+    const allQuestions = await SymptomQuestion.find();
+
+    const formatted = history.map(entry => {
+      const translatedResponses = entry.responses.map(r => {
+        const matchingQuestion = allQuestions.find(q => q.questionNumber === r.questionNumber);
+        return {
+          question: lang === 'ar' ? matchingQuestion?.questionTextArabic : matchingQuestion?.questionText,
+          answer: lang === 'ar'
+            ? (matchingQuestion?.optionsArabic?.[matchingQuestion?.options?.indexOf(r.answer)] || r.answer)
+            : r.answer
+        };
+      });
+
+      return {
+        date: entry.submittedAt,
+        result: entry.result,
+        resultLabel: entry.result === 1
+          ? (lang === 'ar' ? "تم رصد علامات تشير إلى الذئبة" : "Lupus signs detected")
+          : (lang === 'ar' ? "لم يتم رصد علامات الذئبة" : "No lupus signs are detected"),
+        responses: translatedResponses
+      };
+    });
 
     res.status(200).json({ success: true, history: formatted });
   } catch (error) {
     next(error);
   }
 };
-
 export const submitResponsesAndDiagnose = async (req, res, next) => {
   try {
     const userId = req.user._id;
