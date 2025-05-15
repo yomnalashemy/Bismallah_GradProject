@@ -159,7 +159,7 @@ const questions = [
      explanationArabic: "الخزعة الكلوية، والمعروفة أيضًا باسم خزعة الكلى، هي إجراء طبي يُستخدم لأخذ عينة صغيرة من نسيج الكلى وفحصها لمعرفة حالة الكلية."
     },
 
-    {text: "Which class your biopsy showed? (Select one)", 
+  { text: "Which class your biopsy showed? (Select one)", 
     options:["Class 2", "Class 3", "Class 4", "Class 5"],
     explanation: "This is a follow-up question to specify the biopsy class in case of presence.",
     questionTextArabic: "ما الفئة التي أظهرتها الخزعة الخاصة بك؟ (اختر واحدة)",
@@ -170,7 +170,7 @@ const questions = [
     {text: "Has any blood test shown positive for anticardiolipin antibodies?", 
      options:["Yes", "No"], 
      explanation: "These are specific antibodies that can increase risk of blood clots. The answer of this question must be found in your Solid-phase enzyme-linked immunosorbent assays (ELISA) test.",
-     questionTextArabic: "هل أظهر أي اختبار دم إيجابي للأجسام المضادة للكارديوليبين؟",
+     questioTextArabic: "هل أظهر أي اختبار دم إيجابي للأجسام المضادة للكارديوليبين؟",
      optionsArabic: ["نعم", "لأ"],
      explanationArabic: "هذه أجسام مضادة محددة يمكن أن تزيد من خطر الإصابة بجلطات الدم. يجب العثور على إجابة هذا السؤال في اختبار مقايسة الممتز المناعي الصلب المرتبط بالإنزيم (ELISA)."
     },
@@ -199,13 +199,13 @@ const questions = [
     explanationArabic: "C3 هو جزء من جهازك المناعي الذي يمكن أن يشير انخفاض مستوياته إلى الإصابة بالذئبة النشطة. يجب العثور على إجابة هذا السؤال في اختبار CH50 (يُطلق عليه أحيانًا CH100 أو اختبار المكملات الكلية)."
   },
 
-    {text: "Following the total Complement Blood (CH50) test, What is your C4 protein result?", 
-     options:["Low", "Normal"],
-     explanation: "Similar to C3, low C4 can indicate active lupus. The answer of this question must found in your CH50 test (sometimes called CH100 or a total complement test).",
-     questionTextArabic: "بعد اختبار الدم المكمل الكلي (CH50)، ما هي نتيجة بروتين C4؟",
-     optionsArabic: ["منخفض", "طبيعي"],
-     explanationArabic: "على غرار C3، يمكن أن يشير انخفاض C4 إلى الإصابة بالذئبة النشطة. يجب العثور على إجابة هذا السؤال في اختبار CH50 (يُطلق عليه أحياناً CH100 أو اختبار المكملات الكلية)."
-    },
+  {text: "Following the total Complement Blood (CH50) test, What is your C4 protein result?", 
+   options:["Low", "Normal"],
+   explanation: "Similar to C3, low C4 can indicate active lupus. The answer of this question must found in your CH50 test (sometimes called CH100 or a total complement test).",
+   questionTextArabic: "بعد اختبار الدم المكمل الكلي (CH50)، ما هي نتيجة بروتين C4؟",
+   optionsArabic: ["منخفض", "طبيعي"],
+   explanationArabic: "على غرار C3، يمكن أن يشير انخفاض C4 إلى الإصابة بالذئبة النشطة. يجب العثور على إجابة هذا السؤال في اختبار CH50 (يُطلق عليه أحياناً CH100 أو اختبار المكملات الكلية)."
+  },
 
     {text: "Has any blood test shown positive for anti-dsDNA antibodies?",
      options:["Yes", "No"],

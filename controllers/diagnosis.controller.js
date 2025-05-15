@@ -56,7 +56,7 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
       return res.status(400).json({ error: "No responses submitted." });
     }
 
-    // ✅ Translation map for Arabic to English
+    // Translation map for Arabic to English
     const translateAnswer = (answer) => {
       const map = {
         "نعم": "Yes",
@@ -122,7 +122,7 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
     else if (discoid && !subacute && acute) skinLupusScore = 2;
     else if (discoid && subacute && acute) skinLupusScore = 2;
     else if (!discoid && !subacute && !acute) skinLupusScore = 0;
-    
+
     const renalBiopsyClass = encode(answerMap[19]) === 1
       ? {
           "Class 2": 2,
