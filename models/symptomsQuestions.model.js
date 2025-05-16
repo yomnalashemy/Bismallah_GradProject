@@ -6,8 +6,13 @@ const symptomQuestionSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
- questionTextArabic: {
+ 
+questionText: {
   type: String,
+  required: true
+},
+options: {
+  type: [String],
   required: true
 },
 optionsArabic: {
