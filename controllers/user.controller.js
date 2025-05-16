@@ -203,9 +203,6 @@ export const editProfile = async (req, res, next) => {
             return res.status(404).json({ error: 'User not found.' });
         }
 
-        if (req.file && req.file.path) {
-            user.profilePicture = req.file.path; // Cloudinary URL
-          }
     
         if (username && username !== user.username) {
             if (username.length < 5) {
@@ -296,7 +293,7 @@ export const editProfile = async (req, res, next) => {
                 ethnicity: user.ethnicity,
                 phoneNumber: user.phoneNumber,
                 country: user.country,
-                profilePicture: user.profilePicture,
+              
             }
         });
     } catch (error) {

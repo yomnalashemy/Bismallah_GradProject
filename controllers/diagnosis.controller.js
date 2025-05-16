@@ -11,10 +11,14 @@ export const getAllQuestions = async (req, res, next) => {
     const questions = await SymptomQuestion.find().sort({ questionNumber: 1 });
 
     const formatted = questions.map(q => ({
+      _id: q._id,
       questionNumber: q.questionNumber,
       questionText: lang === 'ar' ? q.questionTextArabic : q.questionText,
       options: lang === 'ar' ? q.optionsArabic : q.options,
-      explanation: lang === 'ar' ? q.explanationArabic : q.explanation
+      explanation: lang === 'ar' ? q.explanationArabic : q.explanation,
+      __v: q.__v,
+      createdAt: q.createdAt,
+      updatedAt: q.updatedAt
     }));
 
     res.status(200).json({ success: true, questions: formatted });

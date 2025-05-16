@@ -32,3 +32,47 @@
  
 ]
 }
+
+{
+  "responses": [
+    { "questionNumber": 1, "answer": "إيجابي" },
+    { "questionNumber": 2, "answer": "نعم" },
+    { "questionNumber": 3, "answer": "طبيعي" },
+    { "questionNumber": 4, "answer": "منخفض" },
+    { "questionNumber": 5, "answer": "سلبي" },
+    { "questionNumber": 6, "answer": "لأ" },
+    { "questionNumber": 7, "answer": "نعم" },
+    { "questionNumber": 8, "answer": "نعم" },
+    { "questionNumber": 9, "answer": "لأ" },
+    { "questionNumber": 10, "answer": "نعم" },
+    { "questionNumber": 11, "answer": "نعم" },
+    { "questionNumber": 12, "answer": "نعم" },
+    { "questionNumber": 13, "answer": "نعم" },
+    { "questionNumber": 14, "answer": "لأ" },
+    { "questionNumber": 15, "answer": "لأ" },
+    { "questionNumber": 16, "answer": "لأ" },
+    { "questionNumber": 17, "answer": "نعم" },
+    { "questionNumber": 18, "answer": "مرتفع" },
+    { "questionNumber": 19, "answer": "نعم" },
+    { "questionNumber": 20, "answer": "الفئة 2" },
+    { "questionNumber": 21, "answer": "نعم" },
+    { "questionNumber": 22, "answer": "لأ" },
+    { "questionNumber": 23, "answer": "لأ" },
+    { "questionNumber": 24, "answer": "منخفض" },
+    { "questionNumber": 25, "answer": "طبيعي" },
+    { "questionNumber": 26, "answer": "نعم" },
+    { "questionNumber": 27, "answer": "نعم" }
+  ]
+}
+
+{
+ "email":"ft2063@nyu.edu",
+  "password":"23_12_$_Flavia",
+  "confirmPassword":"23_12_$_Flavia",
+  "country":"Italy",
+  "phoneNumber":"+971565478423",
+  "ethnicity":"European",
+  "username":"fla_via_11",
+  "DateOfBirth":"2002-11-23",
+  "gender":"Female"
+}
