@@ -11,6 +11,11 @@ questionText: {
   type: String,
   required: true
 },
+
+questionTextArabic: {
+  type: String,
+  required: true
+},
 options: {
   type: [String],
   required: true
