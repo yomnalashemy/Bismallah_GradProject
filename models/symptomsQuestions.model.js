@@ -25,8 +25,13 @@ optionsArabic: {
   required: true
 },
 explanationArabic: {
-  type: String
-}
+  type: String,
+  required: true
+},
+explanation: {
+  type: String,
+  required: true
+},
 }, { timestamps: true }, {autoIndex: false});
 
 const SymptomQuestion = mongoose.model('SymptomQuestion', symptomQuestionSchema);

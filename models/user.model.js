@@ -118,7 +118,8 @@ const userSchema = new mongoose.Schema({
     resetPasswordExpires: Date,
 
     authProvider: { 
-        type: String, enum: ["local", "google", "facebook"], required: true, default: "local" }
+        type: String, enum: ["local", "google", "facebook"], required: true, default: "local"
+     }
 }, { timestamps: true }, {autoIndex: false}); //avoiding indexes duplication
 
 
