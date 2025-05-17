@@ -1,306 +1,201 @@
-import bcrypt from 'bcryptjs'; //hashing
+import mongoose from 'mongoose';            
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import User from '../models/user.model.js';
 import { sendResetPasswordEmail } from '../utils/emailService.js';
+import { JWT_SECRET } from '../config/env.js';
 import { sendEmailChangeConfirmation } from '../utils/emailService.js';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
-import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../config/env.js";
+
+const t = (en, ar, lang) => lang === 'ar' ? ar : en;
 
 export const changePassword = async (req, res, next) => {
-    const { oldPassword, newPassword, confirmNewPassword } = req.body;
+  const lang = req.query.lang === 'ar' ? 'ar' : 'en';
+  const { oldPassword, newPassword, confirmNewPassword } = req.body;
 
-    if (!oldPassword || !newPassword || !confirmNewPassword) {
-        return res.status(400).json({ error: "Please provide old password, new password, and confirm the new password." });
+  if (!oldPassword || !newPassword || !confirmNewPassword) {
+    return res.status(400).json({ error: t("Please provide all password fields.", "يرجى إدخال جميع حقول كلمة المرور.", lang) });
+  }
+
+  if (newPassword !== confirmNewPassword) {
+    return res.status(400).json({ error: t("New passwords do not match.", "كلمتا المرور غير متطابقتين.", lang) });
+  }
+
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+  if (!passwordRegex.test(newPassword)) {
+    return res.status(400).json({ error: t("Password must meet complexity requirements.", "يجب أن تحتوي كلمة المرور على تعقيد كافٍ.", lang) });
+  }
+
+  try {
+    const user = await User.findById(req.user._id).select('+password +authProvider');
+    if (!user) return res.status(404).json({ error: t("User not found.", "المستخدم غير موجود.", lang) });
+
+    if (user.authProvider !== "local") {
+      return res.status(400).json({ error: t("Use the original login provider.", "يرجى استخدام مزود تسجيل الدخول الأصلي.", lang) });
     }
 
-    if (newPassword !== confirmNewPassword) {
-        return res.status(400).json({ error: "New passwords do not match." });
-    }
+    const match = await bcrypt.compare(oldPassword, user.password);
+    if (!match) return res.status(401).json({ error: t("Old password incorrect.", "كلمة المرور القديمة غير صحيحة.", lang) });
 
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-    if (!passwordRegex.test(newPassword)) {
-        return res.status(400).json({ error: "New password must include at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character." });
-    }
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
 
-    try {
-        const user = await User.findById(req.user._id).select('+password +authProvider'); //log in with google
-
-        if (!user) {
-            return res.status(404).json({ error: "User not found!" });
-        }
-
-        if (user.authProvider === "google" || user.authProvider === "facebook") {
-            return res.status(400).json({
-                error: "You signed in with Google/Facebook. Use their password reset options instead.",
-            });
-        }
-
-        const passwordMatches = await bcrypt.compare(oldPassword, user.password);
-
-        if (!passwordMatches) {
-            return res.status(401).json({ error: "Old password is incorrect." });
-        }
-
-        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-
-        user.password = hashedNewPassword;
-        await user.save();
-
-        res.status(200).json({ success: true, message: "Password updated successfully." });
-
-    } catch (error) {
-        console.error("Password change failed:", error.message);
-        next(error);
-    }
+    res.status(200).json({ success: true, message: t("Password updated.", "تم تحديث كلمة المرور.", lang) });
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const forgotPassword = async (req, res, next) => {
-    try {
-        const { email } = req.body;
-        if (!email) {
-            return res.status(400).json({ error: "Email is required." });
-        }
+  const lang = req.query.lang === 'ar' ? 'ar' : 'en';
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: t("Email is required.", "البريد الإلكتروني مطلوب.", lang) });
 
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ error: "User with this email does not exist." });
-        }
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ error: t("User not found.", "المستخدم غير موجود.", lang) });
 
-        // Generate a unique reset token
-        const resetToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "1h" });
+    await sendResetPasswordEmail(user.email, user.username, token);
 
-
-        // Send reset email
-        try {
-            await sendResetPasswordEmail(user.email, user.username, resetToken);
-        } catch (error) {
-            return res.status(500).json({ error: "Failed to send reset email. Please try again." });
-        }
-
-        res.status(200).json({
-            success: true,
-            message: "Password reset email sent successfully. Please check your inbox.",
-        });
-    } catch (error) {
-        next(error);
-    }
+    res.status(200).json({
+      success: true,
+      message: t("Password reset email sent.", "تم إرسال بريد إعادة تعيين كلمة المرور.", lang)
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const resetPassword = async (req, res, next) => {
-    try {
-        const authHeader = req.headers.authorization;
-
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: "Unauthorized, no token provided." });
-       }
-
-      const token = authHeader.split(' ')[1];
-      const { newPassword, confirmNewPassword } = req.body;
-  
-      if (!token || !newPassword || !confirmNewPassword) {
-        return res.status(400).json({ error: "Token and new passwords are required." });
-      }
-  
-      if (newPassword !== confirmNewPassword) {
-        return res.status(400).json({ error: "New passwords do not match." });
-      }
-  
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-      if (!passwordRegex.test(newPassword)) {
-        return res.status(400).json({
-          error: "Password must include at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character."
-        });
-      }
-  
-      // Verify token
-      let decoded;
-      try {
-        decoded = jwt.verify(token, JWT_SECRET);
-      } catch (error) {
-        return res.status(400).json({ error: "Invalid or expired reset token." });
-      }
-  
-      const user = await User.findById(decoded.userId);
-
-      user.resetPasswordToken = token;
-      user.resetPasswordExpires = Date.now() + 3600000; // 1 hour expiration
-      await user.save();
-
-  
-      if (!user || user.resetPasswordToken !== token) {
-        return res.status(400).json({ error: "Invalid or expired reset token." });
-      }
-  
-      if (Date.now() > user.resetPasswordExpires) {
-        return res.status(400).json({ error: "Reset token has expired." });
-      }
-  
-      // Hash new password
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-  
-      // Update user's password and clear reset token
-      user.password = hashedPassword;
-      user.resetPasswordToken = undefined;
-      user.resetPasswordExpires = undefined; //clears reset token and expiry  from the database
-      await user.save();
-  
-      res.status(200).json({
-        success: true,
-        message: "Password updated successfully. You can now log in with your new password.",
-      });
-    } catch (error) {
-      next(error);
+  const lang = req.query.lang === 'ar' ? 'ar' : 'en';
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: t("No token provided.", "لم يتم تقديم رمز التحقق.", lang) });
     }
+
+    const token = authHeader.split(' ')[1];
+    const { newPassword, confirmNewPassword } = req.body;
+
+    if (!newPassword || !confirmNewPassword) {
+      return res.status(400).json({ error: t("All password fields required.", "جميع حقول كلمة المرور مطلوبة.", lang) });
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      return res.status(400).json({ error: t("Passwords do not match.", "كلمتا المرور غير متطابقتين.", lang) });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+    if (!user) return res.status(404).json({ error: t("User not found.", "المستخدم غير موجود.", lang) });
+
+    if (Date.now() > user.resetPasswordExpires) {
+      return res.status(400).json({ error: t("Token expired.", "انتهت صلاحية الرمز.", lang) });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: t("Password updated successfully.", "تم تحديث كلمة المرور بنجاح.", lang)
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const translateProfile = (user, lang) => {
+  if (lang !== 'ar') return user;
+  const translate = {
+    male: 'ذكر', female: 'أنثى', other: 'آخر',
+    Egypt: 'مصر', USA: 'الولايات المتحدة', UK: 'بريطانيا', Canada: 'كندا'
   };
-  
-export const deleteAccount = async (req,res, next) => {
-    try {
-        const userId = req.user._id;
-
-        const deletedUser = await User.findByIdAndDelete(userId);
-
-        if (!deletedUser) {
-            const error = new Error("User not found or already deleted.");
-            error.statusCode = 404;
-            throw error;
-        }
-
-        res.status(200).json({
-            success: true,
-            message: "Account deleted successfully.",
-        });
-    } catch (error) {
-        next(error);
-    }
+  return {
+    ...user.toObject(),
+    gender: translate[user.gender] || user.gender,
+    country: translate[user.country] || user.country
+  };
 };
 
 export const getProfile = async (req, res, next) => {
-    try {
-
-        const userId = req.user._id;
-        const user = await User.findById(userId).select('username DateOfBirth ethnicity email gender country phoneNumber profilePicture');
-        if (!user) {    
-            res.status(404).json ({
-                error: "User not found"
-            })
-        }
-        res.status(200).json({
-            success: true,
-            data: user 
-        });
-    }
-    catch (error) {
-        next (error);
-    }
+  const lang = req.query.lang === 'ar' ? 'ar' : 'en';
+  try {
+    const user = await User.findById(req.user._id).select('username DateOfBirth ethnicity email gender country phoneNumber profilePicture');
+    if (!user) return res.status(404).json({ error: t("User not found", "المستخدم غير موجود", lang) });
+    res.status(200).json({ success: true, data: translateProfile(user, lang) });
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const editProfile = async (req, res, next) => {
-    try {
-    const userId = req.user._id; // From the JWT payload
-    const {username, email, DateOfBirth, gender, ethnicity, phoneNumber, country} = req.body;
-    const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ error: 'User not found.' });
-        }
+  const lang = req.query.lang === 'ar' ? 'ar' : 'en';
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ error: t("User not found", "المستخدم غير موجود", lang) });
 
-    
-        if (username && username !== user.username) {
-            if (username.length < 5) {
-                return res.status(400).json({ error: 'Username must be at least 5 characters long.' });
-            } 
-            const usernameRegex = /^(?=.*[\d_])[a-zA-Z0-9._]+$/;
-            if (!usernameRegex.test(username)) {
-                return res.status(400).json({
-                    error: 'Username can only contain letters, numbers, periods, and underscores.'
-                });
-            }
+    const { username, email, DateOfBirth, gender, ethnicity, phoneNumber, country } = req.body;
 
-            const existingUser = await User.findOne({ username });
-            if (existingUser) {
-                return res.status(409).json({ error: 'Username already taken.' });
-            }
-
-            user.username = username;
-        }
-
-        if (email && email !== user.email) {
-            const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
-            if (!emailRegex.test(email)) {
-                return res.status(400).json({ error: 'Invalid email format.' });
-            }
-
-        const existingEmailUser = await User.findOne({ email });
-            if (existingEmailUser) {
-                return res.status(409).json({ error: 'Email is already in use.' });
-            }
-
-            const oldEmail = user.email;
-            user.email = email;
-
-
-            // Send confirmation email
-            try {
-                await sendEmailChangeConfirmation(email, user.username);
-            } catch (err) {
-                console.warn('Email confirmation failed:', err.message);
-                user.email = oldEmail; // Revert email change
-            }
-        }
-
-        if (phoneNumber) {
-            const parsedPhone = parsePhoneNumberFromString(phoneNumber);
-            if (!parsedPhone || !parsedPhone.isValid()) {
-                return res.status(400).json({ error: 'Invalid phone number format.' });
-            }
-        
-            // ADD THIS CHECK FIRST
-            if (user.phoneNumber !== phoneNumber) {
-                const existingPhoneUser = await User.findOne({ phoneNumber });
-                if (existingPhoneUser) {
-                    return res.status(409).json({ error: 'Phone Number already exists.' });
-                }
-            }
-        
-            user.phoneNumber = phoneNumber;
-        }
-        
-        // Other fields
-        if (DateOfBirth) {
-            const dobDate = new Date(DateOfBirth);
-            const today = new Date();
-        
-            if (dobDate > today) {
-                return res.status(400).json({ error: 'Date of birth cannot be in the future.' });
-            }
-        
-            user.DateOfBirth = DateOfBirth;
-        }
-        
-        if (gender) user.gender = gender;
-        if (ethnicity) user.ethnicity = ethnicity;
-        if (country) user.country = country;
-
-        await user.save();
-
-        res.status(200).json({
-            success: true,
-            message: 'Profile updated successfully.',
-            data: {
-                username: user.username,
-                email: user.email,
-                DateOfBirth: user.DateOfBirth,
-                gender: user.gender,
-                ethnicity: user.ethnicity,
-                phoneNumber: user.phoneNumber,
-                country: user.country,
-              
-            }
-        });
-    } catch (error) {
-        next(error);
+    if (username && username !== user.username) {
+      if (username.length < 5) return res.status(400).json({ error: t("Username must be at least 5 characters", "اسم المستخدم يجب أن لا يقل عن 5 حروف", lang) });
+      const usernameRegex = /^(?=.*[\d_])[a-zA-Z0-9._]+$/;
+      if (!usernameRegex.test(username)) {
+        return res.status(400).json({ error: t("Invalid username format", "تنسيق اسم المستخدم غير صالح", lang) });
+      }
+      const existingUser = await User.findOne({ username });
+      if (existingUser) return res.status(409).json({ error: t("Username already taken", "اسم المستخدم مستخدم بالفعل", lang) });
+      user.username = username;
     }
+
+    if (email && email !== user.email) {
+      const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
+      if (!emailRegex.test(email)) return res.status(400).json({ error: t("Invalid email format", "تنسيق البريد الإلكتروني غير صالح", lang) });
+      const existingEmailUser = await User.findOne({ email });
+      if (existingEmailUser) return res.status(409).json({ error: t("Email already in use", "البريد الإلكتروني مستخدم بالفعل", lang) });
+      const oldEmail = user.email;
+      user.email = email;
+      try {
+        await sendEmailChangeConfirmation(email, user.username);
+      } catch (err) {
+        user.email = oldEmail;
+      }
+    }
+
+    if (phoneNumber) {
+      const parsedPhone = parsePhoneNumberFromString(phoneNumber);
+      if (!parsedPhone || !parsedPhone.isValid()) {
+        return res.status(400).json({ error: t("Invalid phone number", "رقم الهاتف غير صالح", lang) });
+      }
+      if (user.phoneNumber !== phoneNumber) {
+        const existingPhoneUser = await User.findOne({ phoneNumber });
+        if (existingPhoneUser) return res.status(409).json({ error: t("Phone number already in use", "رقم الهاتف مستخدم بالفعل", lang) });
+      }
+      user.phoneNumber = phoneNumber;
+    }
+
+    if (DateOfBirth) {
+      const dobDate = new Date(DateOfBirth);
+      if (dobDate > new Date()) {
+        return res.status(400).json({ error: t("Date of birth cannot be in the future", "تاريخ الميلاد لا يمكن أن يكون في المستقبل", lang) });
+      }
+      user.DateOfBirth = DateOfBirth;
+    }
+
+    if (gender) user.gender = gender;
+    if (ethnicity) user.ethnicity = ethnicity;
+    if (country) user.country = country;
+
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: t("Profile updated successfully", "تم تحديث الملف الشخصي بنجاح", lang),
+      data: translateProfile(user, lang)
+    });
+  } catch (error) {
+    next(error);
+  }
 };
-
-
-    
-

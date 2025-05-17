@@ -4,6 +4,7 @@ import User from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import {sendWelcomeEmail} from '../utils/emailService.js';
+import { isEmailDeliverable } from '../utils/validateEmail.js';
 import { parsePhoneNumberFromString } from 'libphonenumber-js'; // FOR VALID PHONE NUMBERS
 import {JWT_SECRET, JWT_EXPIRES_IN, GOOGLE_CLIENT_ID} from '../config/env.js';
 
@@ -29,10 +30,10 @@ export const signUp = async (req, res, next) => {
       });
     }
 
-    const usernameRegex = /^(?=.*[\d_])[a-zA-Z0-9._]+$/;
+    const usernameRegex = /^(?=.*[\d])[a-zA-Z0-9._]+$/;
     if (!usernameRegex.test(username)) {
       return res.status(400).json({
-        error: lang === 'ar' ? "يمكن أن يحتوي اسم المستخدم فقط على حروف وأرقام ونقاط وشرطات سفلية" : "Username can only contain letters, numbers, periods, and underscores!"
+        error: lang === 'ar' ? "يمكن أن يحتوي اسم المستخدم فقط على حروف وأرقام ونقاط" : "Username can only contain letters, numbers, periods."
       });
     }
 
@@ -90,6 +91,8 @@ export const signUp = async (req, res, next) => {
         error: lang === 'ar' ? "فشل إرسال البريد الإلكتروني الترحيبي!" : "Email not found or undeliverable!"
       });
     }
+    await sendEmailVerificationLink(email, username, newUser._id);
+
 
     await session.commitTransaction();
     session.endSession();

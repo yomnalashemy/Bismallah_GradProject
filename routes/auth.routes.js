@@ -258,6 +258,7 @@ authRouter.post('/password/reset', resetPassword);
  *         description: User not found or already deleted.
  */
 authRouter.delete('/delete', protect, deleteAccount );
+authRouter.get("/verify-email", verifyEmail);
 
 
 

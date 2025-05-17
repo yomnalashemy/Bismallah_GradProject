@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-
+import jwt from 'jsonwebtoken';
+import { JWT_SECRET, FRONTEND_URL } from '../config/env.js'; // Add FRONTEND_URL in .env
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
@@ -11,55 +12,28 @@ const transporter = nodemailer.createTransport({
     },
     tls: { rejectUnauthorized: false },
 });
+export const sendEmailVerificationLink = async (email, username, userId) => {
+  const token = jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '1h' });
+  const verifyUrl = `${FRONTEND_URL}/verify-email?token=${token}`;
 
-export const sendWelcomeEmail = async (email, username) => {
-    try {
-        const mailOptions = {
-            from: `Lupira <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: "Welcome to Lupira!",
-            html: `
-                <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; line-height: 1.6;">
-                    <div style="background-color: #6A5ACD; color: #ffffff; padding: 15px; text-align: center; border-radius: 8px 8px 0 0;">
-                        <h1>Welcome to Lupira, ${username}! 🎉</h2>
-                    </div>
-                    <div style="border: 1px solid #ddd; padding: 20px;">
-                        <h3 style="color: #333;">Hello ${username},</h3>
-                        <p style="color: #555;">Thank you for joining <strong>Lupira</strong>! We're thrilled to have you in our community dedicated to supporting your journey.</p>
-                        
-                        <p style="color: #555;">Here’s what you can expect:</p>
-                        <ul style="color: #555;">
-                            <li>🔹 Personalized Diagnosis</li>
-                            <li>🔹 Easy symptom monitoring & insights</li>
-                            <li>🗓️ Review your detection history</li>
-                            <li>📊 Learn more about Lupus</li>
-                        </ul>
+  const mailOptions = {
+    from: `Lupira <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "Verify Your Email - Lupira",
+    html: `
+      <div style="max-width: 600px; margin: auto; font-family: Arial; line-height: 1.6;">
+        <h2>Hi ${username},</h2>
+        <p>Please verify your email by clicking the button below:</p>
+        <a href="${verifyUrl}" style="display:inline-block; margin-top:15px; padding:10px 15px; background-color: #28a745; color:#fff; text-decoration:none; border-radius:5px;">
+          Verify Email
+        </a>
+        <p>This link will expire in 1 hour.</p>
+      </div>
+    `
+  };
 
-                        <p style="color: #555;">If you ever need support, our team is just an email away.</p>
-                        
-                        <a href="https://lupira.app" style="display:inline-block; margin-top:15px; padding:10px 15px; background-color: #6A5ACD; color:#ffffff; text-decoration:none; border-radius:5px;">Get Started</a>
-
-                        <p style="margin-top: 20px; color: #555;">Warm regards,<br><strong>The Lupira Team</strong></p>
-                    </div>
-
-                    <footer style="background-color: #f5f5f5; padding: 10px; text-align: center; color: #888; font-size: 12px;">
-                        © ${new Date().getFullYear()} Lupira. All rights reserved.
-                    </footer>
-                </div>
-            `,
-        };
-
-        await transporter.sendMail(mailOptions);
-        console.log("Welcome email sent to:", email);
-    } catch (error) {
-        console.error("Failed to send email:", error.message);
-        
-        // Nodemailer error code for undeliverable addresses is typically 550
-        if (error.responseCode === 550 || error.responseCode === 553) {
-            throw new Error("Email not found or undeliverable");
-        }
-        throw error;  // For other errors
-    }
+  await transporter.sendMail(mailOptions);
+  console.log("Verification email sent to:", email);
 };
 
 export const sendResetPasswordEmail = async (email, username, resetToken) => {
