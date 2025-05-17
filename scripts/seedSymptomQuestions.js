@@ -10,7 +10,7 @@ const questions = [
     {text: "What is the result of your ANA (anti-nuclear antibody) lab test?", 
      options: ["Positive", "Negative"], 
      explanation: "It’s a blood test that checks the antibodies in your blood if greater than 1:80 then its positive otherwise negative.",
-     questionTextArabic: "ما هي نتيجة الفحص المخبري للأجسام المضادة للأجسام المضادة للنواة؟ما هي نتيجة الفحص المخبري للأجسام المضادة للأجسام المضادة للنواة (ANA)؟",
+     questionTextArabic: "ما هي نتيجة الفحص المخبري للأجسام المضادة للأجسام المضادة للنواة؟ (ANA)؟",
      optionsArabic: ["إيجابي" , "سلبي"],
      explanationArabic: "إنه اختبار دم يفحص الأجسام المضادة في دمك إذا كان أكبر من 1:80 فهو إيجابي وإلا فهو سلبي. "
     },
@@ -18,7 +18,7 @@ const questions = [
     {text: "Have you experienced unexplained, recurrent fever above 38°C (100.4°F)?", 
      options:["Yes", "No"],
      explanation: "Unexplained fevers that aren't due to obvious infection can be a sign that your immune system is overactive.",
-     questionTextArabic: "هل عانيت من حمى متكررة غير مبررة ومتكررة أعلى من 38 درجة مئوية ( درجة فهرنهايت؟)",
+     questionTextArabic: "هل عانيت من حمى متكررة غير مبررة ومتكررة أعلى من 38 درجة مئوية (100.4 درجة فهرنهايت)؟",
      optionsArabic: ["نعم", "لأ"],    
      explanationArabic: "يمكن أن تكون الحمى غير المبررة التي لا ترجع إلى عدوى واضحة علامة على أن جهازك المناعي مفرط النشاط."
     },
