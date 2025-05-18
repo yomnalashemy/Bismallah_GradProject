@@ -199,3 +199,28 @@ export const editProfile = async (req, res, next) => {
     next(error);
   }
 };
+export const deleteAccount = async (req, res, next) => {
+  const lang = req.query.lang === 'ar' ? 'ar' : 'en';
+
+  try {
+    const userId = req.user._id;
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
+      return res.status(404).json({
+        error: lang === 'ar'
+          ? "المستخدم غير موجود أو تم حذفه بالفعل."
+          : "User not found or already deleted."
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: lang === 'ar'
+        ? "تم حذف الحساب بنجاح."
+        : "Account deleted successfully.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};

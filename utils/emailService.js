@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET, FRONTEND_URL } from '../config/env.js'; // Add FRONTEND_URL in .env
+import { JWT_SECRET} from '../config/env.js'; // Add FRONTEND_URL in .env
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
 });
 export const sendEmailVerificationLink = async (email, username, userId) => {
   const token = jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '1h' });
-  const verifyUrl = `${FRONTEND_URL}/verify-email?token=${token}`;
+  const verifyUrl = `Lupira.com/verify-email?token=${token}`;
 
   const mailOptions = {
     from: `Lupira <${process.env.EMAIL_USER}>`,
