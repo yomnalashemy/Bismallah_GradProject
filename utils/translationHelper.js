@@ -147,7 +147,7 @@ const ethnicityMap = {
     "Native American or Alaskan Native":  "أمريكي أصلي أو من سكان ألاسكا الأصليين",
     "White or Caucasian":   "أبيض أو قوقازي",
     "Multoracial or Biracial": "متعدد الأعراق أو ثنائي العرق",
-    "عرق/أصل غير مُدرج هنا": "A race/ethnicity not listed here",
+    "A race/ethnicity not listed here": "عرق/أصل غير مُدرج هنا",
   };
 
 const reverseMap = (obj) => Object.fromEntries(Object.entries(obj).map(([k, v]) => [v, k]));
