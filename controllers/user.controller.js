@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';            
+import { t, translateProfileFields } from '../utils/translationHelper.js';       
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import User from '../models/user.model.js';
@@ -6,8 +6,6 @@ import { sendResetPasswordEmail } from '../utils/emailService.js';
 import { JWT_SECRET } from '../config/env.js';
 import { sendEmailChangeConfirmation } from '../utils/emailService.js';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
-
-const t = (en, ar, lang) => lang === 'ar' ? ar : en;
 
 export const changePassword = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
@@ -108,30 +106,20 @@ export const resetPassword = async (req, res, next) => {
   }
 };
 
-const translateProfile = (user, lang) => {
-  if (lang !== 'ar') return user;
-  const translate = {
-    male: 'ذكر', female: 'أنثى', other: 'آخر',
-    Egypt: 'مصر', USA: 'الولايات المتحدة', UK: 'بريطانيا', Canada: 'كندا'
-  };
-  return {
-    ...user.toObject(),
-    gender: translate[user.gender] || user.gender,
-    country: translate[user.country] || user.country
-  };
-};
-
 export const getProfile = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   try {
     const user = await User.findById(req.user._id).select('username DateOfBirth ethnicity email gender country phoneNumber profilePicture');
     if (!user) return res.status(404).json({ error: t("User not found", "المستخدم غير موجود", lang) });
-    res.status(200).json({ success: true, data: translateProfile(user, lang) });
+
+    res.status(200).json({
+      success: true,
+      data: translateProfileFields.toArabicIfNeeded(user, lang)
+    });
   } catch (error) {
     next(error);
   }
 };
-
 export const editProfile = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   try {
@@ -185,15 +173,15 @@ export const editProfile = async (req, res, next) => {
       user.DateOfBirth = DateOfBirth;
     }
 
-    if (gender) user.gender = gender;
-    if (ethnicity) user.ethnicity = ethnicity;
-    if (country) user.country = country;
+    if (gender) user.gender = translateProfileFields.toEnglish(gender, 'gender');
+    if (ethnicity) user.ethnicity = translateProfileFields.toEnglish(ethnicity, 'ethnicity');
+    if (country) user.country = translateProfileFields.toEnglish(country, 'country');
 
     await user.save();
     res.status(200).json({
       success: true,
       message: t("Profile updated successfully", "تم تحديث الملف الشخصي بنجاح", lang),
-      data: translateProfile(user, lang)
+      data: translateProfileFields.toArabicIfNeeded(user, lang)
     });
   } catch (error) {
     next(error);
