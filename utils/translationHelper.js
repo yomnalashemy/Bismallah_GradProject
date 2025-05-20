@@ -8,6 +8,7 @@ const countryMap = {
   "Afghanistan": "أفغانستان",
   "Albania": "ألبانيا",
   "Algeria": "الجزائر",
+  "American Somoa": "ساموا الأمريكية",
   "Andorra": "أندورا",
   "Angola": "أنغولا",
   "Antigua and Barbuda": "أنتيغوا وبربودا",
