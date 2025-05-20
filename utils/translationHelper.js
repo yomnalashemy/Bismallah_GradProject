@@ -1,7 +1,7 @@
 export const t = (en, ar, lang) => lang === 'ar' ? ar : en;
 
 const genderMap = {
-  "Male": "ذكر", "Female: "أنثى"
+  "Male": "ذكر", "Female": "أنثى"
 };
 
 const countryMap = {
