@@ -216,7 +216,7 @@ const countryMap = {
 const ethnicityMap = {
     "Asian or Pacific Islander" : "آسيوي أو من جزر المحيط الهادئ",
     "Black or African American": "أسود أو أمريكي من أصل أفريقي",
-    "Hispanic or Latinos":   "هسباني أو لاتيني",
+    "Hispanic or Latino":   "هسباني أو لاتيني",
     "Native American or Alaskan Native":  "أمريكي أصلي أو من سكان ألاسكا الأصليين",
     "White or Caucasian":   "أبيض أو قوقازي",
     "Multoracial or Biracial": "متعدد الأعراق أو ثنائي العرق",
