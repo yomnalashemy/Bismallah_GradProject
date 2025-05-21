@@ -75,17 +75,9 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
 
     const translateAnswer = (answer) => {
       const map = {
-        "نعم": "Yes",
-        "لأ": "No",
-        "إيجابي": "Positive",
-        "سلبي": "Negative",
-        "مرتفع": "High",
-        "منخفض": "Low",
-        "طبيعي": "Normal",
-        "الفئة 2": "Class 2",
-        "الفئة 3": "Class 3",
-        "الفئة 4": "Class 4",
-        "الفئة 5": "Class 5"
+        "نعم": "Yes", "لأ": "No", "إيجابي": "Positive", "سلبي": "Negative",
+        "مرتفع": "High", "منخفض": "Low", "طبيعي": "Normal",
+        "الفئة 2": "Class 2", "الفئة 3": "Class 3", "الفئة 4": "Class 4", "الفئة 5": "Class 5"
       };
       return map[answer] || answer;
     };
@@ -95,18 +87,23 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
 
     for (const qNum of requiredQuestions) {
       if (!submittedMap.has(qNum)) {
-        return res.status(400).json({ error: t(
-          `Question ${qNum} is required.`,
-          `يجب الإجابة على السؤال رقم ${qNum}.`
-        )});
+        return res.status(400).json({ error: t(`Question ${qNum} is required.`, `يجب الإجابة على السؤال رقم ${qNum}.`) });
       }
     }
 
-    if (submittedMap.get(19) === "Yes" && !submittedMap.has(20)) {
-      return res.status(400).json({ error: t(
-        "Question 20 is required when question 19 is answered 'Yes'.",
-        "يجب الإجابة على السؤال 20 إذا كانت الإجابة على السؤال 19 هي 'نعم'."
-      )});
+    const answer19 = submittedMap.get(19);
+    const answer20 = submittedMap.get(20);
+
+    if (answer19 === "Yes" && !answer20) {
+      return res.status(400).json({
+        error: t("Question 20 is required when question 19 is answered 'Yes'.", "يجب الإجابة على السؤال 20 إذا كانت الإجابة على السؤال 19 هي 'نعم'.")
+      });
+    }
+
+    if (answer19 === "No" && answer20) {
+      return res.status(400).json({
+        error: t("Question 20 should not be answered when question 19 is 'No'.", "لا يجب الإجابة على فئة الخزعة إذا لم يتم إجراء خزعة.")
+      });
     }
 
     const responses = [];
@@ -117,17 +114,11 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
       const q = await SymptomQuestion.findOne({ questionNumber: entry.questionNumber });
 
       if (!q) {
-        return res.status(400).json({ error: t(
-          `Unknown question number: ${entry.questionNumber}`,
-          `رقم السؤال غير معروف: ${entry.questionNumber}`
-        )});
+        return res.status(400).json({ error: t(`Unknown question number: ${entry.questionNumber}`, `رقم السؤال غير معروف: ${entry.questionNumber}`) });
       }
 
       if (!q.options.includes(translatedAnswer)) {
-        return res.status(400).json({ error: t(
-          `Invalid answer for question: ${q.questionText}`,
-          `إجابة غير صالحة للسؤال: ${q.questionText}`
-        )});
+        return res.status(400).json({ error: t(`Invalid answer for question: ${q.questionText}`, `إجابة غير صالحة للسؤال: ${q.questionText}`) });
       }
 
       responses.push({
@@ -138,6 +129,7 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
 
       answerMap[entry.questionNumber] = translatedAnswer;
     }
+
     const encode = (val, pos = "Yes", one = 1, zero = 0) => val === pos ? one : zero;
 
     const discoid = encode(answerMap[11]);
@@ -151,16 +143,40 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
     else if (discoid && subacute && !acute) skinLupusScore = 3;
     else if (discoid && !subacute && acute) skinLupusScore = 2;
     else if (discoid && subacute && acute) skinLupusScore = 2;
-    else if (!discoid && !subacute && !acute) skinLupusScore = 0;
+    else skinLupusScore = 0;
 
-    const renalBiopsyClass = encode(answerMap[19]) === 1
-      ? {
-          "Class 2": 2,
-          "Class 3": 3,
-          "Class 4": 4,
-          "Class 5": 5
-        }[answerMap[20]] || 0
-      : 0;
+const isRenalBiopsyYes = answerMap[19] === "Yes";
+const biopsyClassAnswer = answerMap[20];
+
+// Validate: if Q19 = Yes but Q20 is missing
+if (isRenalBiopsyYes && !biopsyClassAnswer) {
+  return res.status(400).json({
+    error: lang === 'ar'
+      ? "يرجى اختيار فئة الخزعة عند الإجابة بـ 'نعم' على سؤال الخزعة."
+      : "Question 20 is required when question 19 is answered 'Yes'."
+  });
+}
+
+// Validate: if Q19 = No and Q20 is answered anyway
+if (!isRenalBiopsyYes && biopsyClassAnswer) {
+  return res.status(400).json({
+    error: lang === 'ar'
+      ? "لا يجب الإجابة على فئة الخزعة إذا لم يتم إجراء خزعة."
+      : "Question 20 should not be answered when question 19 is 'No'."
+  });
+}
+
+// Final encoding logic for AI
+let renalBiopsyClass = 0;
+if (isRenalBiopsyYes) {
+  const classMap = {
+    "Class 2": 2,
+    "Class 3": 3,
+    "Class 4": 4,
+    "Class 5": 5
+  };
+  renalBiopsyClass = classMap[biopsyClassAnswer] || 0;
+}
 
     const payload = {
       Ana_test: encode(answerMap[1], "Positive"),
@@ -190,7 +206,6 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
       anti_smith_antibody: encode(answerMap[27])
     };
 
-    // Retry AI request
     let aiResponse;
     let attempts = 0;
     const maxRetries = 3;

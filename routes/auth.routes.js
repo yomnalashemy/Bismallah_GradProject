@@ -3,6 +3,7 @@ import {signUp, logIn, logOut} from '../controllers/auth.controller.js';
 import {changePassword, forgotPassword, resetPassword, deleteAccount} from '../controllers/user.controller.js';
 import protect from '../middlewares/auth.middleware.js';
 import {verifyEmail} from '../controllers/verifyEmail.controller.js';
+import { handleDeeplink } from '../controllers/handleDeeplink.js';
 const authRouter = Router();
 
 /**
@@ -285,4 +286,5 @@ authRouter.delete('/delete', protect, deleteAccount );
  */
 authRouter.get('/verify-email', verifyEmail);
 
+authRouter.get('/deeplink', handleDeeplink); // This handles ?to=reset-password&token=abc
 export default authRouter;
