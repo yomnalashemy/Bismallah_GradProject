@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
 });
 export const sendEmailVerificationLink = async (email, username, userId) => {
   const token = jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '1h' });
-  const verifyUrl = `Lupira.com/verify-email?token=${token}`;
+  const verifyUrl = `https://lupira.onrender.com/api/auth/deeplink?to=verify-email&token=${tokenoken}`;
 
   const mailOptions = {
     from: `Lupira <${process.env.EMAIL_USER}>`,
