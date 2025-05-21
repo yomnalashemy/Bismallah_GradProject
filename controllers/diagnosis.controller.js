@@ -75,7 +75,7 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
 
     const translateAnswer = (answer) => {
       const map = {
-        "نعم": "Yes", "لأ": "No", "إيجابي": "Positive", "سلبي": "Negative",
+        "نعم": "Yes", "لا": "No", "إيجابي": "Positive", "سلبي": "Negative",
         "مرتفع": "High", "منخفض": "Low", "طبيعي": "Normal",
         "الفئة 2": "Class 2", "الفئة 3": "Class 3", "الفئة 4": "Class 4", "الفئة 5": "Class 5"
       };
@@ -145,38 +145,16 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
     else if (discoid && subacute && acute) skinLupusScore = 2;
     else skinLupusScore = 0;
 
-const isRenalBiopsyYes = answerMap[19] === "Yes";
-const biopsyClassAnswer = answerMap[20];
-
-// Validate: if Q19 = Yes but Q20 is missing
-if (isRenalBiopsyYes && !biopsyClassAnswer) {
-  return res.status(400).json({
-    error: lang === 'ar'
-      ? "يرجى اختيار فئة الخزعة عند الإجابة بـ 'نعم' على سؤال الخزعة."
-      : "Question 20 is required when question 19 is answered 'Yes'."
-  });
-}
-
-// Validate: if Q19 = No and Q20 is answered anyway
-if (!isRenalBiopsyYes && biopsyClassAnswer) {
-  return res.status(400).json({
-    error: lang === 'ar'
-      ? "لا يجب الإجابة على فئة الخزعة إذا لم يتم إجراء خزعة."
-      : "Question 20 should not be answered when question 19 is 'No'."
-  });
-}
-
-// Final encoding logic for AI
-let renalBiopsyClass = 0;
-if (isRenalBiopsyYes) {
-  const classMap = {
-    "Class 2": 2,
-    "Class 3": 3,
-    "Class 4": 4,
-    "Class 5": 5
-  };
-  renalBiopsyClass = classMap[biopsyClassAnswer] || 0;
-}
+    let renalBiopsyScore = 0;
+    if (answerMap[19] === "Yes") {
+      const classScoreMap = {
+        "Class 2": 2,
+        "Class 3": 3,
+        "Class 4": 4,
+        "Class 5": 5
+      };
+      renalBiopsyScore = classScoreMap[answerMap[20]] || 0;
+    }
 
     const payload = {
       Ana_test: encode(answerMap[1], "Positive"),
@@ -195,8 +173,7 @@ if (isRenalBiopsyYes) {
       Acute_pericarditis: encode(answerMap[16]),
       Joint_involvement: encode(answerMap[17]),
       Proteinuria: encode(answerMap[18], "High"),
-      Renal_biopsy: encode(answerMap[19]),
-      Renal_biopsy_class: renalBiopsyClass,
+      Renal_biopsy: renalBiopsyScore,
       anti_cardiolipin_anitbody: encode(answerMap[21]),
       anti_b2gp1_antibody: encode(answerMap[22]),
       lupus_anticoagulant: encode(answerMap[23]),
@@ -205,6 +182,9 @@ if (isRenalBiopsyYes) {
       anti_dsDNA_antibody: encode(answerMap[26]),
       anti_smith_antibody: encode(answerMap[27])
     };
+
+    console.log("Encoded Renal Biopsy Class:", renalBiopsyScore);
+    console.log("Payload being sent to AI model:", JSON.stringify(payload, null, 2));
 
     let aiResponse;
     let attempts = 0;
@@ -221,6 +201,8 @@ if (isRenalBiopsyYes) {
         }
       }
     }
+
+    console.log("AI response received:", aiResponse.data);
 
     const diagnosisResult = aiResponse.data.prediction;
 
