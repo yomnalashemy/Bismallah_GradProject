@@ -260,8 +260,29 @@ authRouter.post('/password/reset', resetPassword);
  */
 authRouter.delete('/delete', protect, deleteAccount );
 
+/**
+ * @swagger
+ * /api/auth/verify-email:
+ *   get:
+ *     summary: Verify Email
+ *     description: Verify the user's email address using a token.
+ *     tags:
+ *       - Authentication
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         required: true
+ *         description: Token for email verification.
+ *         schema:
+ *           type: string
+ *           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE1MjAsImlhdCI6MTc0MzYxMDI3OSwiZXhwIjoxNzQzNjEzODc5fQ.ClYC8qtYuUc1QOsWbzgW0NDLTU0awTt5XjyvldqpLjk"
+ *     responses:
+ *       200:
+ *         description: Email verified successfully.
+ *       400:
+ *         description: Invalid or expired verification token.
+ * 
+ */
 authRouter.get('/verify-email', verifyEmail);
-
-
 
 export default authRouter;
