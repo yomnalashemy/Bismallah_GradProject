@@ -8,7 +8,7 @@ export const isEmailDeliverable = async (email) => {
       params: {
         access_key: process.env.MAILBOXLAYER_API_KEY,
         email,
-        smtp: 1,
+        smtp: 0,
         format: 1
       }
     });
