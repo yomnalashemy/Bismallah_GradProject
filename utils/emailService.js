@@ -37,7 +37,7 @@ export const sendEmailVerificationLink = async (email, username, userId) => {
 };
 
 export const sendResetPasswordEmail = async (email, username, resetToken) => {
-    const resetLink = `lupira://reset-password/${resetToken}`;
+    const resetLink = `https://lupira.onrender.com/deeplink?to=reset-password&${resetToken}`;
 
     const mailOptions = {
         from: `Lupira <${process.env.EMAIL_USER}>`,

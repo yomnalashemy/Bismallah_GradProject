@@ -29,10 +29,10 @@ export const signUp = async (req, res, next) => {
       });
     }
 
-    const usernameRegex = /^(?=.*[\d])[a-zA-Z0-9._]+$/;
+    const usernameRegex = /^[a-zA-Z0-9._]+$/; // ✅ underscore is now optional, not required
     if (!usernameRegex.test(username)) {
       return res.status(400).json({
-        error: lang === 'ar' ? "يمكن أن يحتوي اسم المستخدم فقط على حروف وأرقام ونقاط" : "Username can only contain letters, numbers, periods."
+        error: lang === 'ar' ? "يمكن أن يحتوي اسم المستخدم فقط على حروف وأرقام ونقاط وشرطات سفلية" : "Username can only contain letters, numbers, periods, and underscores"
       });
     }
 
@@ -40,6 +40,14 @@ export const signUp = async (req, res, next) => {
     if (!emailRegex.test(email)) {
       return res.status(400).json({
         error: lang === 'ar' ? "يرجى إدخال بريد إلكتروني صالح!" : "Please enter a valid email address!"
+      });
+    }
+
+    // ✅ Check if the email is real and deliverable
+    const deliverable = await isEmailDeliverable(email);
+    if (!deliverable) {
+      return res.status(400).json({
+        error: lang === 'ar' ? "البريد الإلكتروني غير صالح أو غير موجود." : "Email is invalid or undeliverable."
       });
     }
 
@@ -83,15 +91,14 @@ export const signUp = async (req, res, next) => {
 
     try {
       await sendWelcomeEmail(email, username);
+      await sendEmailVerificationLink(email, username, newUser._id);
     } catch (emailError) {
       await session.abortTransaction();
       session.endSession();
       return res.status(500).json({
-        error: lang === 'ar' ? "فشل إرسال البريد الإلكتروني الترحيبي!" : "Email not found or undeliverable!"
+        error: lang === 'ar' ? "فشل إرسال البريد الإلكتروني!" : "Failed to send email!"
       });
     }
-    await sendEmailVerificationLink(email, username, newUser._id);
-
 
     await session.commitTransaction();
     session.endSession();
@@ -101,8 +108,8 @@ export const signUp = async (req, res, next) => {
     return res.status(201).json({
       success: true,
       message: lang === 'ar'
-        ? "تم تسجيل المستخدم بنجاح. تم إرسال بريد إلكتروني ترحيبي"
-        : "User signed in successfully. A welcome email has been sent",
+        ? "تم تسجيل المستخدم بنجاح. تم إرسال بريد إلكتروني ترحيبي ورابط تحقق"
+        : "User registered successfully. A welcome email and verification link have been sent.",
       data: { token, user: newUser }
     });
 
@@ -131,6 +138,15 @@ export const logIn = async (req, res, next) => {
         error: lang === 'ar'
           ? `يرجى تسجيل الدخول باستخدام ${user.authProvider}`
           : `Please log in with ${user.authProvider}.`
+      });
+    }
+
+    // ✅ Require email verification
+    if (!user.isEmailVerified) {
+      return res.status(403).json({
+        error: lang === 'ar'
+          ? "يرجى التحقق من بريدك الإلكتروني قبل تسجيل الدخول"
+          : "Please verify your email before logging in"
       });
     }
 

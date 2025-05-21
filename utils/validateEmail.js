@@ -1,4 +1,3 @@
-// utils/validateEmail.js
 import axios from 'axios';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -14,10 +13,10 @@ export const isEmailDeliverable = async (email) => {
       }
     });
 
-    // Check if SMTP and format are valid
     return res.data.smtp_check && res.data.format_valid;
   } catch (err) {
     console.error("Email validation failed:", err.message);
-    return false; // fail-safe
+    return false;
   }
 };
+

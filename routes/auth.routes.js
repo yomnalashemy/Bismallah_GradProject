@@ -2,6 +2,7 @@ import {Router} from 'express';
 import {signUp, logIn, logOut} from '../controllers/auth.controller.js';
 import {changePassword, forgotPassword, resetPassword, deleteAccount} from '../controllers/user.controller.js';
 import protect from '../middlewares/auth.middleware.js';
+import {verifyEmail} from '../controllers/verifyEmail.controller.js';
 const authRouter = Router();
 
 /**
@@ -259,6 +260,7 @@ authRouter.post('/password/reset', resetPassword);
  */
 authRouter.delete('/delete', protect, deleteAccount );
 
+authRouter.get('/verify-email', verifyEmail);
 
 
 

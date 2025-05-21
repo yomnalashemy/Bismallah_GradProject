@@ -19,7 +19,7 @@ const questions = [
      options:["Yes", "No"],
      explanation: "Unexplained fevers that aren't due to obvious infection can be a sign that your immune system is overactive.",
      questionTextArabic: "هل عانيت من حمى متكررة غير مبررة ومتكررة أعلى من 38 درجة مئوية (100.4 درجة فهرنهايت)؟",
-     optionsArabic: ["نعم", "لأ"],    
+     optionsArabic: ["نعم", "لا"],    
      explanationArabic: "يمكن أن تكون الحمى غير المبررة التي لا ترجع إلى عدوى واضحة علامة على أن جهازك المناعي مفرط النشاط."
     },
 
@@ -51,7 +51,7 @@ const questions = [
      options:["Yes", "No"], 
      explanation: "Changes in mental state due to lupus effects like feeling (inattention, lethargy, confusion, unstable awareness, mood changes)",
      questionTextArabic: "هل مررت بأي فترات من الارتباك أو التوهان أو صعوبة في التفكير بوضوح؟",
-     optionsArabic: ["نعم", "لأ"],
+     optionsArabic: ["نعم", "لا"],
      explanationArabic: "تغيرات في الحالة العقلية بسبب تأثيرات الذئبة مثل الشعور (عدم الانتباه، والخمول، والارتباك، والوعي غير المستقر، وتغيرات المزاج)"
     },
 
@@ -59,7 +59,7 @@ const questions = [
      options:["Yes", "No"], 
      explanation: "This appears due to lupus effects on the nervous system, effects like (Hallucinations, Delusions, Disorganized speech, repeating words or using made-up words, disorganized behavior, Confused thoughts).",
      questionTextArabic: "هل مررت بمواقف كنت تشعر فيها بأفكار غير واقعية أو منفصلة أو غير عادية؟",
-     optionsArabic: ["نعم", "لأ"],
+     optionsArabic: ["نعم", "لا"],
      explanationArabic: "يظهر هذا بسبب تأثيرات الذئبة على الجهاز العصبي، وهي تأثيرات مثل (الهلوسة، والأوهام، والكلام غير المنظم، وتكرار الكلمات أو استخدام كلمات مختلقة وسلوك غير منظم، والأفكار المشوشة)."
     },
 
@@ -67,7 +67,7 @@ const questions = [
      options:["Yes", "No"],
      explanation: "Seizures occur due to lupus effects on the brain or nervous system like feeling (involuntary movements, drooling, jaw clenching, loss of control, unconsciousness, and post-event confusion).",
      questionTextArabic: "هل أصبت بنوبة صرع أو تشنج من قبل؟",
-     optionsArabic: ["نعم", "لأ"] ,
+     optionsArabic: ["نعم", "لا"] ,
      explanationArabic: "تحدث النوبات بسبب تأثيرات مرض الذئبة على الدماغ أو الجهاز العصبي مثل الشعور (حركات لا إرادية، سيلان اللعاب، إطباق الفك، فقدان السيطرة، فقدان الوعي، الارتباك بعد الحدث)."
     },
 
@@ -75,7 +75,7 @@ const questions = [
      options:["Yes", "No"],
      explanation: "This type of hair loss occurs when lupus affects the hair follicles, but the hair can often grow back.",
      questionTextArabic: "هل لاحظت تساقط الشعر بشكل غير عادي حيث تبدو فروة الرأس طبيعية؟",
-     optionsArabic: ["نعم", "لأ"],
+     optionsArabic: ["نعم", "لا"],
      explanationArabic: "ويحدث هذا النوع من تساقط الشعر عندما يؤثر مرض الذئبة على بصيلات الشعر، ولكن يمكن أن ينمو الشعر مرة أخرى في كثير من الأحيان."
     },
 
@@ -83,7 +83,7 @@ const questions = [
      options:["Yes", "No"], 
      explanation: "These are painful sores that can appear in the mouth.",
      questionTextArabic: "هل عانيت من أي تقرحات مؤلمة في فمك، وخاصةً في حنك الفم",
-     optionsArabic: ["نعم", "لأ"],
+     optionsArabic: ["نعم", "لا"],
      explanationArabic: "وهي تقرحات مؤلمة يمكن أن تظهر في الفم."
     },
 
@@ -91,7 +91,7 @@ const questions = [
      options:["Yes", "No"],
      explanation: "These are distinct circular rashes that can leave scarring and skin discoloration.",
      questionTextArabic: "هل ظهرت لديك أي بقع مستديرة متقشرة على جلدك قد تترك ندبات؟",
-     optionsArabic: ["نعم", "لأ"],
+     optionsArabic: ["نعم", "لا"],
      explanationArabic: "وهي عبارة عن طفح جلدي دائري مميز يمكن أن يترك ندوباً وتغيراً في لون الجلد."
     },
 
@@ -99,7 +99,7 @@ const questions = [
      options:["Yes", "No"],
      explanation: "Flat, red or flaky patches on the skin that might sting in sunlight but don’t usually leave marks.",
      questionTextArabic: "هل لاحظت أي طفح جلدي أحمر أو متقشر أو على شكل حلقات على جلدك؟ لا تترك هذه الطفح الجلدي عادةً ندبات ولكنها قد تكون حساسة لأشعة الشمس.",
-     optionsArabic: ["نعم", "لأ"],
+     optionsArabic: ["نعم", "لا"],
      explanationArabic: "بقع مسطحة أو حمراء أو متقشرة على الجلد قد تلسع في ضوء الشمس ولكنها لا تترك عادةً علامات."
     },
 
@@ -107,7 +107,7 @@ const questions = [
      options:["Yes", "No"], 
      explanation: "This is a characteristic rash that appears across the cheeks and bridge of the nose in a butterfly pattern.",
      questionTextArabic: "هل لاحظت طفحًا جلديًا على خديك وأنفك، يسمى أحيانًا طفح الفراشة؟",
-     optionsArabic: ["نعم", "لأ"],
+     optionsArabic: ["نعم", "لا"],
      explanationArabic: "وهو طفح جلدي مميز يظهر على الخدين وجسر الأنف على شكل فراشة."
     },
 
@@ -115,7 +115,7 @@ const questions = [
      options:["Yes", "No"], 
      explanation: "An inflammation of the lining around your lungs, which can cause pain when breathing. There might be expansion on one side of the chest, or better to make Chest X-ray or Ultrasound or Computed tomography (CT) to make sure that you have pleural effusion.",
      questionTextArabic: "هل عانيت من ألم في الصدر يزداد أثناء التنفس؟",
-     optionsArabic: ["نعم", "لأ"],
+     optionsArabic: ["نعم", "لا"],
      explanationArabic: "التهاب في البطانة المحيطة بالرئتين، والذي يمكن أن يسبب ألماً عند التنفس. قد يكون هناك توسع في جانب واحد من الصدر، أو من الأفضل إجراء تصوير الصدر بالأشعة السينية أو الموجات فوق الصوتية أو التصوير المقطعي المحوسب (CT) للتأكد من وجود انصباب جنبي."
     },
 
@@ -123,7 +123,7 @@ const questions = [
      options:["Yes", "No"], 
      explanation: "Symptoms like shortness of breath or difficulty breathing (dyspnea), Discomfort when breathing while lying down.",
      questionTextArabic: "هل عانيت من ألم في الصدر وضيق في التنفس أو هل ذكر لك أي طبيب وجود سوائل حول قلبك؟",
-     optionsArabic: ["نعم", "لأ"],
+     optionsArabic: ["نعم", "لا"],
      explanationArabic: "أعراض مثل ضيق التنفس أو صعوبة التنفس (عسر التنفس)، وعدم الراحة عند التنفس أثناء الاستلقاء."
     },
 
@@ -131,7 +131,7 @@ const questions = [
      options:["Yes", "No"],
      explanation: "Inflammation of the outer layer heart that causes chest pain like sharp stabbing chest pain and sometimes causes pain in one or both shoulders.",
      questionTextArabic: "هل أثر أي ألم في صدرك على أنشطتك اليومية، مثل المشي أو صعود السلالم؟",
-     optionsArabic: ["نعم", "لأ"],
+     optionsArabic: ["نعم", "لا"],
      explanationArabic: "التهاب الطبقة الخارجية للقلب الذي يسبب ألمًا في الصدر مثل ألم الصدر الحاد الطاعن وأحيانًا يسبب ألمًا في أحد الكتفين أو كليهما."
     },
 
@@ -139,7 +139,7 @@ const questions = [
      options:["Yes", "No"],
      explanation: "Lupus commonly causes pain and swelling in joints, often moving from one joint to another.",
      questionTextArabic: "هل تعاني من ألم في المفاصل أو تورم ينتقل من مفصل إلى آخر؟",
-     optionsArabic: ["نعم", "لأ"],
+     optionsArabic: ["نعم", "لا"],
      explanationArabic: "يسبب مرض الذئبة عادةً ألماً وتورماً في المفاصل، وغالباً ما ينتقل من مفصل إلى آخر."
     },
 
@@ -155,7 +155,7 @@ const questions = [
      options:["Yes", "No"],
      explanation: "A renal biopsy, also known as a kidney biopsy, is a medical procedure used to take a small sample of kidney tissue and examine it to know the kidney’s condition.",
      questionTextArabic: "هل أظهرت خزعة الكلى أي تغيرات طفيفة إلى متوسطة أو كبيرة إلى أي تغيرات؟",
-     optionsArabic: ["نعم", "لأ"],
+     optionsArabic: ["نعم", "لا"],
      explanationArabic: "الخزعة الكلوية، والمعروفة أيضًا باسم خزعة الكلى، هي إجراء طبي يُستخدم لأخذ عينة صغيرة من نسيج الكلى وفحصها لمعرفة حالة الكلية."
     },
 
@@ -171,7 +171,7 @@ const questions = [
    options:["Yes", "No"], 
    explanation: "These are specific antibodies that can increase risk of blood clots. The answer of this question must be found in your Solid-phase enzyme-linked immunosorbent assays (ELISA) test.",
    questionTextArabic: "هل أظهر أي اختبار دم إيجابي للأجسام المضادة للكارديوليبين؟",
-   optionsArabic: ["نعم", "لأ"],
+   optionsArabic: ["نعم", "لا"],
    explanationArabic: "هذه أجسام مضادة محددة يمكن أن تزيد من خطر الإصابة بجلطات الدم. يجب العثور على إجابة هذا السؤال في اختبار مقايسة الممتز المناعي الصلب المرتبط بالإنزيم (ELISA)."
  },
 
@@ -179,7 +179,7 @@ const questions = [
    options:["Yes", "No"],
    explanation: "These are antibodies that can also increase risk of blood clots. The answer of this question must be found in your Solid-phase enzyme-linked immunosorbent assays (ELISA) test.",
    questionTextArabic: "هل أظهر أي اختبار دم إيجابي للأجسام المضادة لـ β2GP1؟",
-   optionsArabic: ["نعم", "لأ"],
+   optionsArabic: ["نعم", "لا"],
    explanationArabic: "هذه أجسام مضادة يمكن أن تزيد أيضًا من خطر الإصابة بجلطات الدم. يجب العثور على إجابة هذا السؤال في اختبار مقايسة الممتز المناعي الصلب المرتبط بالإنزيم (ELISA)." 
   },
 
@@ -187,7 +187,7 @@ const questions = [
   options:["Yes", "No"], 
   explanation: "This is another type of antibody that can increase risk of blood clots. The answer of this question must be found in your PTT, LA-sensitive PTT or dilute Russell viper venom test (DRVVT).",
   questionTextArabic: "هل أظهر أي اختبار دم إيجابي لمضادات تخثر الذئبة؟",
-  optionsArabic: ["نعم", "لأ"],
+  optionsArabic: ["نعم", "لا"],
   explanationArabic: "هذا نوع آخر من الأجسام المضادة التي يمكن أن تزيد من خطر الإصابة بجلطات الدم. يجب العثور على إجابة هذا السؤال في اختبار PTT أو PTT الحساس لـ LA أو اختبار سم أفعى راسل المخفف (DRVVVT)."
   },
 
@@ -211,7 +211,7 @@ const questions = [
   options:["Yes", "No"],
   explanation: "These are specific antibodies that are very characteristic of lupus. The answer of this question must found in your anti-dsDNA ELISA test.",
   questionTextArabic: "هل أظهر أي اختبار دم إيجابي للأجسام المضادة للحمض النووي الريبي المنزوع الأكسجين؟",
-  optionsArabic: ["نعم", "لأ"],
+  optionsArabic: ["نعم", "لا"],
   explanationArabic: "هذه أجسام مضادة محددة مميزة جدًا لمرض الذئبة. يجب أن تكون إجابة هذا السؤال موجودة في اختبار مضادات الحمض النووي الريبي المنقوص الأكسجين (ELISA)."
  },
 
@@ -219,7 +219,7 @@ const questions = [
   options:["Yes", "No"],
   explanation: "These antibodies are highly specific for lupus if present. The answer of this question must found in your anti-Smith ELISA test.",
   questionTextArabic: "هل أظهر أي اختبار دم إيجابي للأجسام المضادة لسميث؟",
-  optionsArabic: ["نعم", "لأ"],
+  optionsArabic: ["نعم", "لا"],
   explanationArabic: "هذه الأجسام المضادة محددة للغاية لمرض الذئبة في حالة وجودها. يجب أن تكون إجابة هذا السؤال موجودة في اختبار ELISA المضاد للذئبة."
   },
     
