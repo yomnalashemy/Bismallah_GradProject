@@ -7,5 +7,5 @@ export const handleDeeplink = async (req, res) => {
   }
 
   const deepLink = `lupira://${to}?token=${token}`;
-  return res.redirect(deepLink); // 302 redirect to app
+  return res.redirect(deepLink); // Redirects to mobile app
 };

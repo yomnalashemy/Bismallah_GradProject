@@ -8,15 +8,14 @@ export const isEmailDeliverable = async (email) => {
       params: {
         access_key: process.env.MAILBOXLAYER_API_KEY,
         email,
-        smtp: 0,
-        format: 1
+        format: 1, // keep this
+        smtp: 0    // disable this on free tier
       }
     });
 
-    return res.data.smtp_check && res.data.format_valid;
+    return res.data.format_valid; // only check format
   } catch (err) {
     console.error("Email validation failed:", err.message);
-    return false;
+    return true; // don't block the user if MailboxLayer fails
   }
 };
-

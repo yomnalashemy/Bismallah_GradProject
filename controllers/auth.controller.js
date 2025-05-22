@@ -8,114 +8,59 @@ import { parsePhoneNumberFromString } from 'libphonenumber-js'; // FOR VALID PHO
 import {JWT_SECRET, JWT_EXPIRES_IN, GOOGLE_CLIENT_ID} from '../config/env.js';
 
 export const signUp = async (req, res, next) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
+  const t = (en, ar) => lang === 'ar' ? ar : en;
 
   try {
     const { username, email, password, confirmPassword, phoneNumber, gender, country, DateOfBirth, ethnicity } = req.body;
 
-    const existingUser = await User.findOne({ $or: [{ email }, { phoneNumber }] });
-    if (existingUser) {
-      return res.status(409).json({
-        error: lang === 'ar' ? "المستخدم موجود بالفعل" : "User already exists"
-      });
-    }
-
     if (!username || username.length < 5) {
-      return res.status(400).json({
-        error: lang === 'ar' ? "يجب أن يكون اسم المستخدم 5 أحرف على الأقل" : "Username must be at least 5 characters long!"
-      });
+      return res.status(400).json({ error: t("Username must be at least 5 characters", "يجب أن يكون اسم المستخدم 5 أحرف على الأقل") });
     }
 
-    const usernameRegex = /^[a-zA-Z0-9._]+$/; // ✅ underscore is now optional, not required
+    const usernameRegex = /^[a-zA-Z0-9._]+$/;
     if (!usernameRegex.test(username)) {
-      return res.status(400).json({
-        error: lang === 'ar' ? "يمكن أن يحتوي اسم المستخدم فقط على حروف وأرقام ونقاط وشرطات سفلية" : "Username can only contain letters, numbers, periods, and underscores"
-      });
+      return res.status(400).json({ error: t("Username can only contain letters, numbers, periods, and underscores", "يمكن أن يحتوي اسم المستخدم فقط على حروف وأرقام ونقاط وشرطات سفلية") });
     }
 
-    const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+    const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        error: lang === 'ar' ? "يرجى إدخال بريد إلكتروني صالح!" : "Please enter a valid email address!"
-      });
+      return res.status(400).json({ error: t("Please enter a valid email address", "يرجى إدخال بريد إلكتروني صالح") });
     }
 
-    // ✅ Check if the email is real and deliverable
     const deliverable = await isEmailDeliverable(email);
     if (!deliverable) {
-      return res.status(400).json({
-        error: lang === 'ar' ? "البريد الإلكتروني غير صالح أو غير موجود." : "Email is invalid or undeliverable."
-      });
+      return res.status(400).json({ error: t("Email is invalid or undeliverable", "البريد الإلكتروني غير صالح أو غير موجود") });
     }
 
     const parsedPhone = parsePhoneNumberFromString(phoneNumber);
     if (!parsedPhone || !parsedPhone.isValid()) {
-      return res.status(400).json({
-        error: lang === 'ar' ? "رقم الهاتف غير صالح" : "Invalid phone number format!"
-      });
+      return res.status(400).json({ error: t("Invalid phone number format", "تنسيق رقم الهاتف غير صالح") });
     }
 
     if (password !== confirmPassword) {
-      return res.status(400).json({
-        error: lang === 'ar' ? "كلمتا المرور غير متطابقتين!" : "Passwords don't match!"
-      });
-    }
-
-    if (!password || password.length < 8) {
-      return res.status(400).json({
-        error: lang === 'ar' ? "يجب أن تكون كلمة المرور 8 أحرف على الأقل!" : "Password must be at least 8 characters long!"
-      });
+      return res.status(400).json({ error: t("Passwords do not match", "كلمتا المرور غير متطابقتين") });
     }
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     if (!passwordRegex.test(password)) {
-      return res.status(400).json({
-        error: lang === 'ar'
-          ? "يجب أن تحتوي كلمة المرور على حرف صغير وحرف كبير ورقم ورمز خاص!"
-          : "Password must include at least one lowercase letter, one uppercase letter, one number, and one special character!"
-      });
+      return res.status(400).json({ error: t("Password must include uppercase, lowercase, number, and symbol", "يجب أن تحتوي كلمة المرور على حرف كبير وصغير ورقم ورمز") });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({
-      username, email, phoneNumber, country,
-      password: hashedPassword, DateOfBirth, ethnicity, gender,
-      authProvider: "local"
-    });
+    const token = jwt.sign(
+      { username, email, password: hashedPassword, phoneNumber, gender, country, DateOfBirth, ethnicity },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
 
-    newUser.confirmPassword = confirmPassword;
-    await newUser.save({ session });
+    await sendEmailVerificationLink(email, username, token);
 
-    try {
-      await sendWelcomeEmail(email, username);
-      await sendEmailVerificationLink(email, username, newUser._id);
-    } catch (emailError) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(500).json({
-        error: lang === 'ar' ? "فشل إرسال البريد الإلكتروني!" : "Failed to send email!"
-      });
-    }
-
-    await session.commitTransaction();
-    session.endSession();
-
-    const token = jwt.sign({ userId: newUser._id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-
-    return res.status(201).json({
+    res.status(200).json({
       success: true,
-      message: lang === 'ar'
-        ? "تم تسجيل المستخدم بنجاح. تم إرسال بريد إلكتروني ترحيبي ورابط تحقق"
-        : "User registered successfully. A welcome email and verification link have been sent.",
-      data: { token, user: newUser }
+      message: t("Verification email sent. Please check your inbox.", "تم إرسال بريد التحقق. يرجى التحقق من صندوق الوارد.")
     });
-
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
     next(error);
   }
 };

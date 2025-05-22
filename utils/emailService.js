@@ -5,15 +5,15 @@ import { JWT_SECRET} from '../config/env.js'; // Add FRONTEND_URL in .env
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, //Gmail app password
-    },
-    tls: { rejectUnauthorized: false },
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+  tls: { rejectUnauthorized: false },
 });
-export const sendEmailVerificationLink = async (email, username, userId) => {
-  const token = jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '1h' });
+
+export const sendEmailVerificationLink = async (email, username, token) => {
   const verifyUrl = `https://lupira.onrender.com/api/auth/deeplink?to=verify-email&token=${token}`;
 
   const mailOptions = {
@@ -21,10 +21,10 @@ export const sendEmailVerificationLink = async (email, username, userId) => {
     to: email,
     subject: "Verify Your Email - Lupira",
     html: `
-      <div style="max-width: 600px; margin: auto; font-family: Arial; line-height: 1.6;">
-        <h2>Hi ${username},</h2>
-        <p>Please verify your email by clicking the button below:</p>
-        <a href="${verifyUrl}" style="display:inline-block; margin-top:15px; padding:10px 15px; background-color: #28a745; color:#fff; text-decoration:none; border-radius:5px;">
+      <div style="font-family: Arial, sans-serif;">
+        <h2>Hello ${username},</h2>
+        <p>Please verify your email by clicking below:</p>
+        <a href="${verifyUrl}" style="background-color: #28a745; padding: 10px 15px; color: #fff; text-decoration: none; border-radius: 5px;">
           Verify Email
         </a>
         <p>This link will expire in 1 hour.</p>
