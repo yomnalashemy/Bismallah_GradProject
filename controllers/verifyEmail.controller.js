@@ -39,7 +39,17 @@ export const verifyEmail = async (req, res) => {
     });
 
     await newUser.save();
-    return res.redirect(`https://lupira.onrender.com/api/auth/deeplink?to=verify-email&token=${token}`);
+    return res.send(`
+  <html>
+    <head><title>Email Verified</title></head>
+    <body style="font-family: sans-serif; text-align: center; padding-top: 40px;">
+      <h2>✅ Your email has been verified!</h2>
+      <p>You can now return to the app and log in.</p>
+    </body>
+  </html>
+`);
+
+
   } catch (err) {
     return res.status(400).json({ error: t("Invalid or expired verification token", "رمز التحقق غير صالح أو منتهي") });
   }
