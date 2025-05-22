@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import User from '../models/user.model.js';
 import { sendResetPasswordEmail } from '../utils/emailService.js';
 import { JWT_SECRET } from '../config/env.js';
-import { sendEmailChangeConfirmation } from '../utils/emailService.js';
+import { sendEmailChangeVerificationLink } from '../utils/emailService.js';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 export const changePassword = async (req, res, next) => {
@@ -122,54 +122,56 @@ export const getProfile = async (req, res, next) => {
 };
 export const editProfile = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
+  const t = (en, ar) => lang === 'ar' ? ar : en;
+
   try {
     const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ error: t("User not found", "المستخدم غير موجود", lang) });
+    if (!user) return res.status(404).json({ error: t("User not found", "المستخدم غير موجود") });
 
     const { username, email, DateOfBirth, gender, ethnicity, phoneNumber, country } = req.body;
 
     if (username && username !== user.username) {
       if (username.length < 5) return res.status(400).json({ error: t("Username must be at least 5 characters", "اسم المستخدم يجب أن لا يقل عن 5 حروف", lang) });
-      const usernameRegex = /^(?=.*[\d_])[a-zA-Z0-9._]+$/;
-      if (!usernameRegex.test(username)) {
-        return res.status(400).json({ error: t("Invalid username format", "تنسيق اسم المستخدم غير صالح", lang) });
-      }
-      const existingUser = await User.findOne({ username });
-      if (existingUser) return res.status(409).json({ error: t("Username already taken", "اسم المستخدم مستخدم بالفعل", lang) });
+      const usernameRegex = /^[a-zA-Z0-9._]+$/;
+      if (!usernameRegex.test(username)) return res.status(400).json({ error: t("Invalid username format", "تنسيق اسم المستخدم غير صالح", lang) });
+
+      const existing = await User.findOne({ username });
+      if (existing) return res.status(409).json({ error: t("Username already taken", "اسم المستخدم مستخدم بالفعل", lang) });
       user.username = username;
     }
 
     if (email && email !== user.email) {
       const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
       if (!emailRegex.test(email)) return res.status(400).json({ error: t("Invalid email format", "تنسيق البريد الإلكتروني غير صالح", lang) });
-      const existingEmailUser = await User.findOne({ email });
-      if (existingEmailUser) return res.status(409).json({ error: t("Email already in use", "البريد الإلكتروني مستخدم بالفعل", lang) });
-      const oldEmail = user.email;
-      user.email = email;
-      try {
-        await sendEmailChangeConfirmation(email, user.username);
-      } catch (err) {
-        user.email = oldEmail;
-      }
+
+      const exists = await User.findOne({ email });
+      if (exists) return res.status(409).json({ error: t("Email already in use", "البريد الإلكتروني مستخدم بالفعل", lang) });
+
+      await sendEmailChangeVerificationLink(email, user._id);
+
+      return res.status(200).json({
+        success: true,
+        message: t(
+          "A verification link has been sent to your new email. Please confirm it.",
+          "تم إرسال رابط التحقق إلى بريدك الجديد. يرجى تأكيده."
+        )
+      });
     }
 
     if (phoneNumber) {
       const parsedPhone = parsePhoneNumberFromString(phoneNumber);
-      if (!parsedPhone || !parsedPhone.isValid()) {
-        return res.status(400).json({ error: t("Invalid phone number", "رقم الهاتف غير صالح", lang) });
-      }
+      if (!parsedPhone || !parsedPhone.isValid()) return res.status(400).json({ error: t("Invalid phone number", "رقم الهاتف غير صالح", lang) });
+
       if (user.phoneNumber !== phoneNumber) {
-        const existingPhoneUser = await User.findOne({ phoneNumber });
-        if (existingPhoneUser) return res.status(409).json({ error: t("Phone number already in use", "رقم الهاتف مستخدم بالفعل", lang) });
+        const exists = await User.findOne({ phoneNumber });
+        if (exists) return res.status(409).json({ error: t("Phone number already in use", "رقم الهاتف مستخدم بالفعل", lang) });
       }
       user.phoneNumber = phoneNumber;
     }
 
     if (DateOfBirth) {
-      const dobDate = new Date(DateOfBirth);
-      if (dobDate > new Date()) {
-        return res.status(400).json({ error: t("Date of birth cannot be in the future", "تاريخ الميلاد لا يمكن أن يكون في المستقبل", lang) });
-      }
+      const dob = new Date(DateOfBirth);
+      if (dob > new Date()) return res.status(400).json({ error: t("Date of birth cannot be in the future", "تاريخ الميلاد لا يمكن أن يكون في المستقبل", lang) });
       user.DateOfBirth = DateOfBirth;
     }
 
@@ -185,7 +187,7 @@ export const editProfile = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
-  }
+  }
 };
 export const deleteAccount = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';

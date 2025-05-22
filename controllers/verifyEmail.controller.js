@@ -7,43 +7,40 @@ export const verifyEmail = async (req, res) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   const t = (en, ar) => lang === 'ar' ? ar : en;
 
-  if (!token) {
-    return res.status(400).json({ error: t("Verification token is missing", "رمز التحقق مفقود") });
-  }
+  if (!token) return res.status(400).json({ error: t("Verification token is missing", "رمز التحقق مفقود") });
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    const { username, email, password, phoneNumber, gender, country, DateOfBirth, ethnicity } = decoded;
 
-    const existing = await User.findOne({ email });
-    if (existing) {
-      return res.status(400).json({ error: t("Account already exists", "الحساب موجود بالفعل") });
+    if (decoded.changeEmail) {
+      const user = await User.findById(decoded.userId);
+      if (!user) return res.status(404).json({ error: t("User not found", "المستخدم غير موجود") });
+
+      user.email = decoded.email;
+      await user.save();
+
+      return res.redirect('lupira://login');
     }
 
+    const existing = await User.findOne({ email: decoded.email });
+    if (existing) return res.status(400).json({ error: t("Account already exists", "الحساب موجود بالفعل") });
+
     const newUser = new User({
-      username,
-      email,
-      password,
-      phoneNumber,
-      gender,
-      country,
-      DateOfBirth,
-      ethnicity,
+      username: decoded.username,
+      email: decoded.email,
+      password: decoded.password,
+      phoneNumber: decoded.phoneNumber,
+      gender: decoded.gender,
+      country: decoded.country,
+      DateOfBirth: decoded.DateOfBirth,
+      ethnicity: decoded.ethnicity,
       authProvider: "local",
       isVerified: true
     });
 
     await newUser.save();
-
-    // ✅ No redirect here — just send success
-    return res.status(200).json({
-      success: true,
-      message: t("Email verified and account created successfully", "تم التحقق من البريد الإلكتروني وإنشاء الحساب بنجاح")
-    });
-
+    return res.redirect('lupira://login');
   } catch (err) {
-    return res.status(400).json({
-      error: t("Invalid or expired verification token", "رمز التحقق غير صالح أو منتهي")
-    });
+    return res.status(400).json({ error: t("Invalid or expired verification token", "رمز التحقق غير صالح أو منتهي") });
   }
 };
