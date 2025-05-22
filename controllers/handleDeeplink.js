@@ -8,5 +8,5 @@ export const handleDeeplink = async (req, res) => {
   // ✅ Redirect to frontend route on the same domain
   const fallbackWebPage = `https://lupira.onrender.com/${to}?token=${token}`;
 
-  return res.redirect(fallbackWebPage); // ✅ Now it will work in email clients and browsers
+  return res.redirect(fallbackWebPage); //  Now it will work in email clients and browsers
 };
