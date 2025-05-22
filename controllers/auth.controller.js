@@ -1,6 +1,7 @@
-import mongoose from 'mongoose';
 import { OAuth2Client } from 'google-auth-library';
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 import User from '../models/user.model.js';
+import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { isEmailDeliverable } from '../utils/validateEmail.js';
@@ -60,6 +61,62 @@ export const signUp = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: t("Verification email sent. Please check your inbox.", "تم إرسال بريد التحقق. يرجى التحقق من صندوق الوارد.")
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const signUpWithGoogle = async (req, res, next) => {
+  const lang = req.query.lang === 'ar' ? 'ar' : 'en';
+  const t = (en, ar) => lang === 'ar' ? ar : en;
+
+  try {
+    const { token } = req.body;
+    if (!token) return res.status(400).json({ error: t("Google token is required", "مطلوب رمز Google") });
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const { email, name } = ticket.getPayload();
+
+    const existing = await User.findOne({ email });
+    if (existing) return res.status(400).json({ error: t("User already exists", "المستخدم موجود بالفعل") });
+
+    const signupToken = jwt.sign({ email, source: "google" }, JWT_SECRET, { expiresIn: '1h' });
+
+    res.status(200).json({
+      success: true,
+      message: t("Redirect to complete profile", "يرجى إكمال الملف الشخصي"),
+      token: signupToken
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const signUpWithFacebook = async (req, res, next) => {
+  const lang = req.query.lang === 'ar' ? 'ar' : 'en';
+  const t = (en, ar) => lang === 'ar' ? ar : en;
+
+  try {
+    const { accessToken } = req.body;
+    if (!accessToken) return res.status(400).json({ error: t("Facebook access token is required", "مطلوب رمز Facebook") });
+
+    const fbRes = await axios.get(`https://graph.facebook.com/me?fields=name,email&access_token=${accessToken}`);
+    const { email, name } = fbRes.data;
+
+    const existing = await User.findOne({ email });
+    if (existing) return res.status(400).json({ error: t("User already exists", "المستخدم موجود بالفعل") });
+
+    const signupToken = jwt.sign({ email, source: "facebook" }, JWT_SECRET, { expiresIn: '1h' });
+
+    res.status(200).json({
+      success: true,
+      message: t("Redirect to complete profile", "يرجى إكمال الملف الشخصي"),
+      token: signupToken
     });
   } catch (error) {
     next(error);
