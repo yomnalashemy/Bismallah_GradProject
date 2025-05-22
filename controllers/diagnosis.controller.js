@@ -48,6 +48,7 @@ export const getDetectionHistory = async (req, res, next) => {
       });
 
       return {
+        id: entry._id,
         date: entry.submittedAt,
         result: entry.result,
         resultLabel: entry.result === 1
@@ -225,6 +226,62 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
       }
     });
 
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export const deleteAllDetectionHistory = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    const deleted = await SymptomResponse.deleteMany({ user: userId });
+
+    if (deleted.deletedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: req.query.lang === 'ar'
+          ? "لا توجد نتائج للكشف لحذفها"
+          : "No detection history to delete"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: req.query.lang === 'ar'
+        ? "تم حذف جميع نتائج الكشف بنجاح"
+        : "All detection history deleted successfully"
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteDetectionById = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { id } = req.params;
+
+    const entry = await SymptomResponse.findOne({ _id: id, user: userId });
+
+    if (!entry) {
+      return res.status(404).json({
+        success: false,
+        message: req.query.lang === 'ar'
+          ? "لم يتم العثور على نتيجة الكشف"
+          : "Detection result not found"
+      });
+    }
+
+    await SymptomResponse.deleteOne({ _id: id });
+
+    res.status(200).json({
+      success: true,
+      message: req.query.lang === 'ar'
+        ? "تم حذف النتيجة بنجاح"
+        : "Detection result deleted successfully"
+    });
   } catch (error) {
     next(error);
   }

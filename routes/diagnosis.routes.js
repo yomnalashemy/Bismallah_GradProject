@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import { getAllQuestions, getDetectionHistory, submitResponsesAndDiagnose } from '../controllers/diagnosis.controller.js';
+import { getAllQuestions, getDetectionHistory, submitResponsesAndDiagnose, deleteDetectionById, deleteAllDetectionHistory } from '../controllers/diagnosis.controller.js';
 import protect from '../middlewares/auth.middleware.js';
 const diagnosisRouter = Router();
 
@@ -173,4 +173,90 @@ diagnosisRouter.get('/history', protect, getDetectionHistory);
  *                      Prediction error: Internal server error from AI model
  */
 diagnosisRouter.post('/detection', protect, submitResponsesAndDiagnose);
+
+/**
+ * @swagger
+ * /api/diagnosis/history/{id}:
+ *   delete:
+ *     summary: Delete a specific detection result
+ *     description: Deletes one detection result for the authenticated user based on the entry ID.
+ *     tags:
+ *       - Detection History
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the detection entry (MongoDB ObjectId)
+ *       - in: query
+ *         name: lang
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [en, ar]
+ *         description: Language for the response messages
+ *     responses:
+ *       200:
+ *         description: Detection result deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Detection result not found
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+
+diagnosisRouter.delete('/history/:id', protect, deleteDetectionById);
+
+/**
+ * @swagger
+ * /api/diagnosis/history:
+ *   delete:
+ *     summary: Delete all detection results for the current user
+ *     description: Deletes all detection results submitted by the currently authenticated user.
+ *     tags:
+ *       - Detection History
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: lang
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [en, ar]
+ *         description: Language for the response messages
+ *     responses:
+ *       200:
+ *         description: All detection results deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: No detection history to delete
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+
+diagnosisRouter.delete('/history', protect, deleteAllDetectionHistory);
 export default diagnosisRouter;

@@ -39,3 +39,4 @@ const symptomResponseSchema = new mongoose.Schema({
 
 const SymptomResponse = mongoose.model('SymptomResponse', symptomResponseSchema);
 export default SymptomResponse;
+
