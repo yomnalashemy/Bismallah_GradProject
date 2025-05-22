@@ -38,12 +38,11 @@ export const verifyEmail = async (req, res) => {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Email Verified</title>
-        <script>
-          window.location.href = "lupira://verify-email?token=${token}";
-          setTimeout(() => {
-            document.body.innerHTML = '<h2>If the app didn\\'t open, please make sure it is installed.</h2>';
-          }, 3000);
-        </script>
+       <h2>Your email has been verified!</h2>
+<p>✅ Now tap the button below to open the Lupira app:</p>
+<a href="lupira://verify-email?token=${token}" style="padding: 10px 20px; background-color: #6A5ACD; color: #fff; border-radius: 5px; text-decoration: none;">
+  Open App
+</a>
       </head>
       <body>
         <h2>✅ Your email has been verified!</h2>
