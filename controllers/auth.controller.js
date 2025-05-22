@@ -20,7 +20,8 @@ export const signUp = async (req, res, next) => {
     if (!usernameRegex.test(username))
       return res.status(400).json({ error: "Username contains invalid characters" });
 
-    const emailRegex = /^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$/;
+   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (!emailRegex.test(email))
       return res.status(400).json({ error: "Invalid email" });
 
