@@ -4,6 +4,7 @@ import User from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { isEmailDeliverable } from '../utils/validateEmail.js';
+import { sendEmailVerificationLink } from '../utils/emailService.js';
 import { parsePhoneNumberFromString } from 'libphonenumber-js'; // FOR VALID PHONE NUMBERS
 import {JWT_SECRET, JWT_EXPIRES_IN, GOOGLE_CLIENT_ID} from '../config/env.js';
 
