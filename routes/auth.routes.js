@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import {signUp, logIn, logOut} from '../controllers/auth.controller.js';
+import {signUp, logIn, signUpWithGoogle, signUpWithFacebook, completeProfile, loginWithFacebook, loginWithGoogle, logOut} from '../controllers/auth.controller.js';
 import {changePassword, forgotPassword, resetPassword, deleteAccount} from '../controllers/user.controller.js';
 import protect from '../middlewares/auth.middleware.js';
 import {verifyEmail} from '../controllers/verifyEmail.controller.js';
@@ -286,5 +286,12 @@ authRouter.delete('/delete', protect, deleteAccount );
  */
 authRouter.get('/verify-email', verifyEmail);
 
-authRouter.get('/deeplink', handleDeeplink); // This handles ?to=reset-password&token=abc
+authRouter.get('/deeplink', handleDeeplink); 
+// This handles ?to=reset-password&token=abc
+
+authRouter.post('/google/signup', signUpWithGoogle);
+authRouter.post('/facebook/signup', signUpWithFacebook);
+authRouter.post('/google/login', loginWithGoogle);
+authRouter.post('/facebook/login', loginWithFacebook);
+authRouter.post('/complete-profile', completeProfile);
 export default authRouter;

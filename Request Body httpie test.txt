@@ -76,3 +76,16 @@
   "DateOfBirth":"2002-11-23",
   "gender":"Female"
 }
+
+
+{
+ "email":"yomnakhaled1594@gmail.com",
+  "password":"23_11_$_Yomna",
+  "confirmPassword":"23_11_$_Yomna",
+  "country":"Egypt",
+  "phoneNumber":"+201277264055",
+  "ethnicity":"White or Caucasian",
+  "username":"23_11_Yomna",
+  "DateOfBirth":"2002-11-23",
+  "gender":"Female"
+}

@@ -7,7 +7,7 @@ import bcrypt from 'bcryptjs';
 import { isEmailDeliverable } from '../utils/validateEmail.js';
 import { sendEmailVerificationLink } from '../utils/emailService.js';
 import { parsePhoneNumberFromString } from 'libphonenumber-js'; // FOR VALID PHONE NUMBERS
-import {JWT_SECRET, JWT_EXPIRES_IN, GOOGLE_CLIENT_ID} from '../config/env.js';
+import {JWT_SECRET, JWT_EXPIRES_IN} from '../config/env.js';
 
 export const signUp = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
@@ -172,6 +172,44 @@ export const logIn = async (req, res, next) => {
     next(error);
   }
 };
+export const loginWithGoogle = async (req, res, next) => {
+  try {
+    const { token } = req.body;
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+
+    const { email } = ticket.getPayload();
+    const user = await User.findOne({ email });
+
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const jwtToken = generateToken(user._id);
+    res.status(200).json({ success: true, token: jwtToken, user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const loginWithFacebook = async (req, res, next) => {
+  try {
+    const { accessToken } = req.body;
+
+    const fbRes = await axios.get(`https://graph.facebook.com/me?fields=email&access_token=${accessToken}`);
+    const { email } = fbRes.data;
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const jwtToken = generateToken(user._id);
+    res.status(200).json({ success: true, token: jwtToken, user });
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 export const logOut = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
@@ -183,6 +221,48 @@ export const logOut = async (req, res, next) => {
         ? "تم تسجيل الخروج بنجاح. يرجى حذف التوكن من الجهاز"
         : "User logged out successfully. Please clear token on client-side."
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const completeProfile = async (req, res, next) => {
+  try {
+    const { authorization } = req.headers;
+    const token = authorization?.split(" ")[1];
+
+    const lang = req.query.lang === 'ar' ? 'ar' : 'en';
+    const t = (en, ar) => lang === 'ar' ? ar : en;
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    const {
+      username, phoneNumber, gender,
+      country, DateOfBirth, ethnicity
+    } = req.body;
+
+    const existing = await User.findOne({ email: decoded.email });
+    if (existing) return res.status(400).json({ error: t("User already exists", "المستخدم موجود بالفعل") });
+
+    const parsedPhone = parsePhoneNumberFromString(phoneNumber);
+    if (!parsedPhone || !parsedPhone.isValid()) {
+      return res.status(400).json({ error: t("Invalid phone number", "رقم الهاتف غير صالح") });
+    }
+
+    const newUser = await User.create({
+      email: decoded.email,
+      username,
+      phoneNumber,
+      gender,
+      country,
+      DateOfBirth,
+      ethnicity,
+      loginSource: decoded.source,
+      password: null
+    });
+
+    const authToken = generateToken(newUser._id);
+    res.status(201).json({ success: true, token: authToken, user: newUser });
   } catch (error) {
     next(error);
   }
