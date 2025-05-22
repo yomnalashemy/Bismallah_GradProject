@@ -29,7 +29,6 @@ export const signUp = async (req, res, next) => {
       return res.status(400).json({ error: "Passwords do not match" });
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-
     if (!passwordRegex.test(password))
       return res.status(400).json({ error: "Weak password" });
 
@@ -109,6 +108,11 @@ export const logIn = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
+
+    if (!user.isVerified) {
+  return res.status(403).json({ error: "Please verify your email." });
+}
+
 
     if (!user) {
       return res.status(401).json({

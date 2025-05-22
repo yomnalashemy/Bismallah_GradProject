@@ -9,8 +9,14 @@ export const verifyEmail = async (req, res) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    const existingUser = await User.findOne({ email: decoded.email });
-    if (!existingUser) {
+    let existingUser = await User.findOne({ email: decoded.email });
+
+    if (existingUser) {
+      if (!existingUser.isVerified) {
+        existingUser.isVerified = true;
+        await existingUser.save();
+      }
+    } else {
       await User.create({
         username: decoded.username,
         email: decoded.email,
@@ -45,6 +51,7 @@ export const verifyEmail = async (req, res) => {
       </body>
       </html>
     `);
+
   } catch (err) {
     console.error("Email verification error:", err);
     return res.status(400).send("Invalid or expired verification token");
