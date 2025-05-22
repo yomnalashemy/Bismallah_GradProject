@@ -13,7 +13,8 @@ const transporter = nodemailer.createTransport({
   tls: { rejectUnauthorized: false },
 });
 
-export const sendEmailVerificationLink = async (email, username, token) => {
+export const sendEmailVerificationLink = async (email, username, userId) => {
+  const token = jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '1h' });
   const verifyUrl = `https://lupira.onrender.com/api/auth/deeplink?to=verify-email&token=${token}`;
 
   const mailOptions = {
@@ -21,13 +22,26 @@ export const sendEmailVerificationLink = async (email, username, token) => {
     to: email,
     subject: "Verify Your Email - Lupira",
     html: `
-      <div style="font-family: Arial, sans-serif;">
-        <h2>Hello ${username},</h2>
-        <p>Please verify your email by clicking below:</p>
-        <a href="${verifyUrl}" style="background-color: #28a745; padding: 10px 15px; color: #fff; text-decoration: none; border-radius: 5px;">
-          Verify Email
-        </a>
-        <p>This link will expire in 1 hour.</p>
+      <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; line-height: 1.6;">
+        <div style="background-color: #6A5ACD; color: #ffffff; padding: 15px; text-align: center; border-radius: 8px 8px 0 0;">
+          <h1>Verify Your Email</h1>
+        </div>
+        <div style="border: 1px solid #ddd; padding: 20px;">
+          <p style="color: #555;">Hello <strong>${username}</strong>,</p>
+          <p style="color: #555;">Thank you for signing up with <strong>Lupira</strong>! Please verify your email address by clicking the button below:</p>
+
+          <a href="${verifyUrl}" style="display:inline-block; margin-top:15px; padding:10px 15px; background-color: #28a745; color:#ffffff; text-decoration:none; border-radius:5px;">
+            Verify Email
+          </a>
+
+          <p style="color: #555;">This link will expire in 1 hour. If you did not create an account, please ignore this message.</p>
+
+          <p style="margin-top: 20px; color: #555;">Warm Regards,<br><strong>The Lupira Team</strong></p>
+        </div>
+
+        <footer style="background-color: #f5f5f5; padding: 10px; text-align: center; color: #888; font-size: 12px;">
+          © ${new Date().getFullYear()} Lupira. All rights reserved.
+        </footer>
       </div>
     `
   };
