@@ -32,24 +32,34 @@ export const verifyEmail = async (req, res) => {
     }
 
     res.send(`
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Email Verified</title>
-       <h2>Your email has been verified!</h2>
-<p>✅ Now tap the button below to open the Lupira app:</p>
-<a href="lupira://verify-email?token=${token}" style="padding: 10px 20px; background-color: #6A5ACD; color: #fff; border-radius: 5px; text-decoration: none;">
-  Open App
-</a>
-      </head>
-      <body>
-        <h2>✅ Your email has been verified!</h2>
-        <p>If nothing happens, <a href="lupira://verify-email?token=${token}">tap here</a>.</p>
-      </body>
-      </html>
-    `);
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Email Verified</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      body { font-family: Arial, sans-serif; text-align: center; padding: 40px; }
+      a {
+        padding: 12px 24px;
+        background-color: #6A5ACD;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        display: inline-block;
+        margin-top: 20px;
+        font-size: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>✅ Your email has been verified!</h2>
+    <p>Tap the button below to open the Lupira app.</p>
+    <a href="lupira://verify-email?token=${token}">Open App</a>
+  </body>
+  </html>
+`);
+
 
   } catch (err) {
     console.error("Email verification error:", err);
