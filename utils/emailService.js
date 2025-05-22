@@ -1,42 +1,40 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET} from '../config/env.js'; // Add FRONTEND_URL in .env
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  tls: { rejectUnauthorized: false },
+  tls: { rejectUnauthorized: false }
 });
 
 export const sendEmailVerificationLink = async (email, username, token) => {
   const verifyUrl = `https://lupira.onrender.com/api/auth/verify-email?token=${encodeURIComponent(token)}`;
+
   const mailOptions = {
     from: `Lupira <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Verify Your Email - Lupira",
     html: `
       <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; line-height: 1.6;">
-        <div style="background-color: #6A5ACD; color: #ffffff; padding: 15px; text-align: center; border-radius: 8px 8px 0 0;">
-          <h1>Verify Your Email</h1>
+        <div style="background-color: #6A5ACD; color: #ffffff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+          <h1 style="margin: 0;">Verify Your Email</h1>
         </div>
-        <div style="border: 1px solid #ddd; padding: 20px;">
-          <p style="color: #555;">Hello <strong>${username}</strong>,</p>
-          <p style="color: #555;">Thank you for signing up with <strong>Lupira</strong>! Please verify your email address by clicking the button below:</p>
-
-          <a href="${verifyUrl}" style="display:inline-block; margin-top:15px; padding:10px 15px; background-color: #28a745; color:#ffffff; text-decoration:none; border-radius:5px;">
-            Verify Email
-          </a>
-
-          <p style="color: #555;">This link will expire in 1 hour. If you did not create an account, please ignore this message.</p>
-
-          <p style="margin-top: 20px; color: #555;">Warm Regards,<br><strong>The Lupira Team</strong></p>
+        <div style="border: 1px solid #ddd; padding: 30px;">
+          <p>Hello <strong>${username}</strong>,</p>
+          <p>Thank you for signing up with <strong>Lupira</strong>! Please verify your email address by clicking the button below:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${verifyUrl}" style="padding: 12px 24px; background-color: #28a745; color: #ffffff; text-decoration: none; border-radius: 5px;">
+              Verify Email
+            </a>
+          </div>
+          <p>This link will expire in 1 hour. If you did not create an account, you can safely ignore this email.</p>
+          <p style="margin-top: 30px;">Warm regards,<br><strong>The Lupira Team</strong></p>
         </div>
-
         <footer style="background-color: #f5f5f5; padding: 10px; text-align: center; color: #888; font-size: 12px;">
           © ${new Date().getFullYear()} Lupira. All rights reserved.
         </footer>

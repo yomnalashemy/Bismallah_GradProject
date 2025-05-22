@@ -10,44 +10,26 @@ import { parsePhoneNumberFromString } from 'libphonenumber-js'; // FOR VALID PHO
 import {JWT_SECRET, JWT_EXPIRES_IN} from '../config/env.js';
 
 export const signUp = async (req, res, next) => {
-  const lang = req.query.lang === 'ar' ? 'ar' : 'en';
-  const t = (en, ar) => lang === 'ar' ? ar : en;
-
   try {
     const { username, email, password, confirmPassword, phoneNumber, gender, country, DateOfBirth, ethnicity } = req.body;
 
-    if (!username || username.length < 5) {
-      return res.status(400).json({ error: t("Username must be at least 5 characters", "يجب أن يكون اسم المستخدم 5 أحرف على الأقل") });
-    }
+    if (!username || username.length < 5)
+      return res.status(400).json({ error: "Username must be at least 5 characters" });
 
     const usernameRegex = /^[a-zA-Z0-9._]+$/;
-    if (!usernameRegex.test(username)) {
-      return res.status(400).json({ error: t("Username can only contain letters, numbers, periods, and underscores", "يمكن أن يحتوي اسم المستخدم فقط على حروف وأرقام ونقاط وشرطات سفلية") });
-    }
+    if (!usernameRegex.test(username))
+      return res.status(400).json({ error: "Username contains invalid characters" });
 
-    const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ error: t("Please enter a valid email address", "يرجى إدخال بريد إلكتروني صالح") });
-    }
+    const emailRegex = /^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$/;
+    if (!emailRegex.test(email))
+      return res.status(400).json({ error: "Invalid email" });
 
-    const deliverable = await isEmailDeliverable(email);
-    if (!deliverable) {
-      return res.status(400).json({ error: t("Email is invalid or undeliverable", "البريد الإلكتروني غير صالح أو غير موجود") });
-    }
+    if (password !== confirmPassword)
+      return res.status(400).json({ error: "Passwords do not match" });
 
-    const parsedPhone = parsePhoneNumberFromString(phoneNumber);
-    if (!parsedPhone || !parsedPhone.isValid()) {
-      return res.status(400).json({ error: t("Invalid phone number format", "تنسيق رقم الهاتف غير صالح") });
-    }
-
-    if (password !== confirmPassword) {
-      return res.status(400).json({ error: t("Passwords do not match", "كلمتا المرور غير متطابقتين") });
-    }
-
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-    if (!passwordRegex.test(password)) {
-      return res.status(400).json({ error: t("Password must include uppercase, lowercase, number, and symbol", "يجب أن تحتوي كلمة المرور على حرف كبير وصغير ورقم ورمز") });
-    }
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W_]).{8,}$/;
+    if (!passwordRegex.test(password))
+      return res.status(400).json({ error: "Weak password" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const token = jwt.sign(
@@ -58,15 +40,11 @@ export const signUp = async (req, res, next) => {
 
     await sendEmailVerificationLink(email, username, token);
 
-    res.status(200).json({
-      success: true,
-      message: t("Verification email sent. Please check your inbox.", "تم إرسال بريد التحقق. يرجى التحقق من صندوق الوارد.")
-    });
+    res.status(200).json({ success: true, message: "Verification email sent" });
   } catch (error) {
     next(error);
   }
 };
-
 export const signUpWithGoogle = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   const t = (en, ar) => lang === 'ar' ? ar : en;

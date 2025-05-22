@@ -4,65 +4,49 @@ import { JWT_SECRET } from '../config/env.js';
 
 export const verifyEmail = async (req, res) => {
   const token = req.query.token;
-  const lang = req.query.lang === 'ar' ? 'ar' : 'en';
-  const t = (en, ar) => lang === 'ar' ? ar : en;
-
   if (!token) return res.status(400).send("Missing token");
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    // ✅ Email change flow
-    if (decoded.changeEmail) {
-      const user = await User.findById(decoded.userId);
-      if (!user) return res.status(404).send("User not found");
-
-      user.email = decoded.email;
-      await user.save();
-
-      // ✅ Redirect to deep link into app
-     return res.send(`
-  <html>
-    <head><title>Opening App</title></head>
-    <body>
-      <script>
-        window.location.href = "lupira://verify-email?token=${token}";
-        setTimeout(() => {
-          document.body.innerHTML = "If nothing happens, make sure the app is installed or open it manually.";
-        }, 2000);
-      </script>
-      <p>Redirecting to Lupira App...</p>
-      <p>If it doesn't work, <a href="lupira://verify-email?token=${token}">tap here</a>.</p>
-    </body>
-  </html>
-`);
-
-    }
-
-    // ✅ Regular signup flow
     const existingUser = await User.findOne({ email: decoded.email });
-
-    if (existingUser) {
-      return res.redirect(`lupira://verify-email?token=${token}`);
+    if (!existingUser) {
+      await User.create({
+        username: decoded.username,
+        email: decoded.email,
+        password: decoded.password,
+        phoneNumber: decoded.phoneNumber,
+        gender: decoded.gender,
+        country: decoded.country,
+        DateOfBirth: decoded.DateOfBirth,
+        ethnicity: decoded.ethnicity,
+        authProvider: "local",
+        isVerified: true
+      });
     }
 
-    await User.create({
-      username: decoded.username,
-      email: decoded.email,
-      password: decoded.password,
-      phoneNumber: decoded.phoneNumber,
-      gender: decoded.gender,
-      country: decoded.country,
-      DateOfBirth: decoded.DateOfBirth,
-      ethnicity: decoded.ethnicity,
-      authProvider: "local",
-      isVerified: true
-    });
-
-    return res.redirect(`lupira://verify-email?token=${token}`);
-
-  } catch (error) {
-    console.error("Email verification error:", error);
+    res.send(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Email Verified</title>
+        <script>
+          window.location.href = "lupira://verify-email?token=${token}";
+          setTimeout(() => {
+            document.body.innerHTML = '<h2>If the app didn\\'t open, please make sure it is installed.</h2>';
+          }, 3000);
+        </script>
+      </head>
+      <body>
+        <h2>✅ Your email has been verified!</h2>
+        <p>If nothing happens, <a href="lupira://verify-email?token=${token}">tap here</a>.</p>
+      </body>
+      </html>
+    `);
+  } catch (err) {
+    console.error("Email verification error:", err);
     return res.status(400).send("Invalid or expired verification token");
   }
 };
