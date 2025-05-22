@@ -289,9 +289,227 @@ authRouter.get('/verify-email', verifyEmail);
 authRouter.get('/deeplink', handleDeeplink); 
 // This handles ?to=reset-password&token=abc
 
+/**
+ * @swagger
+ * /auth/google/signup:
+ *   post:
+ *     summary: Sign up with Google
+ *     description: Verifies the Google ID token and issues a temporary token to complete the user profile.
+ *     tags:
+ *       - Social Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: Google ID token retrieved from frontend
+ *     responses:
+ *       200:
+ *         description: Temporary token issued for profile completion
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 token:
+ *                   type: string
+ *       400:
+ *         description: Token missing or user already exists
+ *       500:
+ *         description: Server error
+ */
 authRouter.post('/google/signup', signUpWithGoogle);
+
+/**
+ * @swagger
+ * /auth/facebook/signup:
+ *   post:
+ *     summary: Sign up with Facebook
+ *     description: Verifies the Facebook access token and issues a temporary token to complete the user profile.
+ *     tags:
+ *       - Social Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - accessToken
+ *             properties:
+ *               accessToken:
+ *                 type: string
+ *                 description: Facebook access token retrieved from frontend
+ *     responses:
+ *       200:
+ *         description: Temporary token issued for profile completion
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 token:
+ *                   type: string
+ *       400:
+ *         description: Token missing or user already exists
+ *       500:
+ *         description: Server error
+ */
 authRouter.post('/facebook/signup', signUpWithFacebook);
+
+/**
+ * @swagger
+ * /auth/google/login:
+ *   post:
+ *     summary: Log in with Google
+ *     description: Authenticates an existing user via Google and returns a JWT.
+ *     tags:
+ *       - Social Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: Google ID token from frontend
+ *     responses:
+ *       200:
+ *         description: User authenticated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   type: object
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
 authRouter.post('/google/login', loginWithGoogle);
+/**
+ * @swagger
+ * /auth/facebook/login:
+ *   post:
+ *     summary: Log in with Facebook
+ *     description: Authenticates an existing user via Facebook and returns a JWT.
+ *     tags:
+ *       - Social Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - accessToken
+ *             properties:
+ *               accessToken:
+ *                 type: string
+ *                 description: Facebook access token from frontend
+ *     responses:
+ *       200:
+ *         description: User authenticated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   type: object
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
 authRouter.post('/facebook/login', loginWithFacebook);
+
+/**
+ * @swagger
+ * /auth/complete-profile:
+ *   post:
+ *     summary: Complete user profile after social signup
+ *     description: Finalizes the account by saving additional user information after social signup (Google or Facebook).
+ *     tags:
+ *       - Social Auth
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - phoneNumber
+ *               - gender
+ *               - country
+ *               - DateOfBirth
+ *               - ethnicity
+ *             properties:
+ *               username:
+ *                 type: string
+ *               phoneNumber:
+ *                 type: string
+ *               gender:
+ *                 type: string
+ *               country:
+ *                 type: string
+ *               DateOfBirth:
+ *                 type: string
+ *                 format: date
+ *               ethnicity:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User profile completed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   type: object
+ *       400:
+ *         description: Missing or invalid data, or user already exists
+ *       401:
+ *         description: Invalid or expired token
+ *       500:
+ *         description: Server error
+ */
+
 authRouter.post('/complete-profile', completeProfile);
 export default authRouter;
