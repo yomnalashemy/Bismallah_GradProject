@@ -102,11 +102,6 @@ export const signUpWithFacebook = async (req, res, next) => {
   }
 };
 
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-import User from '../models/user.model.js';
-import { JWT_SECRET, JWT_EXPIRES_IN } from '../config/env.js';
-
 export const logIn = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   const t = (en, ar) => lang === 'ar' ? ar : en;
