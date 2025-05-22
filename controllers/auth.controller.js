@@ -8,7 +8,7 @@ import { isEmailDeliverable } from '../utils/validateEmail.js';
 import { sendEmailVerificationLink } from '../utils/emailService.js';
 import { parsePhoneNumberFromString } from 'libphonenumber-js'; // FOR VALID PHONE NUMBERS
 import {JWT_SECRET, JWT_EXPIRES_IN} from '../config/env.js';
-import { translateProfileFields } from '../utils/translationHelper.js';
+import { t, translateProfileFields } from '../utils/translationHelper.js';
 export const signUp = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   const t = (en, ar) => lang === 'ar' ? ar : en;
