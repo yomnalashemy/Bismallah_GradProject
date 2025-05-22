@@ -22,24 +22,21 @@ export const verifyEmail = async (req, res) => {
 
       // ✅ Redirect to deep link into app
      return res.send(`
-  <!DOCTYPE html>
   <html>
-  <head>
-    <title>Opening Lupira...</title>
-    <script>
-      window.location.href = "lupira://verify-email?token=${token}";
-      setTimeout(() => {
-        document.body.innerHTML = "<p>If the app did not open, please make sure it is installed and try again.</p>";
-      }, 3000);
-    </script>
-  </head>
-  <body>
-    <h2>Redirecting to Lupira App...</h2>
-    <p>If nothing happens, <a href="lupira://verify-email?token=${token}">tap here</a>.</p>
-  </body>
+    <head><title>Opening App</title></head>
+    <body>
+      <script>
+        window.location.href = "lupira://verify-email?token=${token}";
+        setTimeout(() => {
+          document.body.innerHTML = "If nothing happens, make sure the app is installed or open it manually.";
+        }, 2000);
+      </script>
+      <p>Redirecting to Lupira App...</p>
+      <p>If it doesn't work, <a href="lupira://verify-email?token=${token}">tap here</a>.</p>
+    </body>
   </html>
 `);
-;
+
     }
 
     // ✅ Regular signup flow
