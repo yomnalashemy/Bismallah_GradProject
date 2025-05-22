@@ -10,27 +10,44 @@ import { parsePhoneNumberFromString } from 'libphonenumber-js'; // FOR VALID PHO
 import {JWT_SECRET, JWT_EXPIRES_IN} from '../config/env.js';
 
 export const signUp = async (req, res, next) => {
+  const lang = req.query.lang === 'ar' ? 'ar' : 'en';
+  const t = (en, ar) => lang === 'ar' ? ar : en;
+
   try {
-    const { username, email, password, confirmPassword, phoneNumber, gender, country, DateOfBirth, ethnicity } = req.body;
+    const {
+      username,
+      email,
+      password,
+      confirmPassword,
+      phoneNumber,
+      gender,
+      country,
+      DateOfBirth,
+      ethnicity
+    } = req.body;
 
     if (!username || username.length < 5)
-      return res.status(400).json({ error: "Username must be at least 5 characters" });
+      return res.status(400).json({ error: t("Username must be at least 5 characters", "اسم المستخدم يجب أن يكون 5 أحرف على الأقل") });
 
     const usernameRegex = /^[a-zA-Z0-9._]+$/;
     if (!usernameRegex.test(username))
-      return res.status(400).json({ error: "Username contains invalid characters" });
+      return res.status(400).json({ error: t("Username contains invalid characters", "اسم المستخدم يحتوي على رموز غير مسموح بها") });
 
-   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email))
-      return res.status(400).json({ error: "Invalid email" });
+      return res.status(400).json({ error: t("Invalid email", "البريد الإلكتروني غير صالح") });
 
     if (password !== confirmPassword)
-      return res.status(400).json({ error: "Passwords do not match" });
+      return res.status(400).json({ error: t("Passwords do not match", "كلمتا المرور غير متطابقتين") });
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     if (!passwordRegex.test(password))
-      return res.status(400).json({ error: "Weak password" });
+      return res.status(400).json({ error: t("Password must include uppercase, lowercase, number, and symbol", "يجب أن تحتوي كلمة المرور على حرف كبير وصغير ورقم ورمز") });
+
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      return res.status(409).json({ error: t("Username or email already in use", "اسم المستخدم أو البريد الإلكتروني مستخدم بالفعل") });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const token = jwt.sign(
@@ -41,11 +58,15 @@ export const signUp = async (req, res, next) => {
 
     await sendEmailVerificationLink(email, username, token);
 
-    res.status(200).json({ success: true, message: "Verification email sent" });
+    res.status(200).json({
+      success: true,
+      message: t("Verification email sent", "تم إرسال بريد التحقق")
+    });
   } catch (error) {
     next(error);
   }
 };
+
 export const signUpWithGoogle = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   const t = (en, ar) => lang === 'ar' ? ar : en;
