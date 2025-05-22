@@ -49,9 +49,23 @@ export const signUp = async (req, res, next) => {
       return res.status(409).json({ error: t("Username or email already in use", "اسم المستخدم أو البريد الإلكتروني مستخدم بالفعل") });
     }
 
+    // ✅ Translate values to English if in Arabic
+    const genderEn = translateProfileFields.toEnglish(gender, 'gender');
+    const countryEn = translateProfileFields.toEnglish(country, 'country');
+    const ethnicityEn = translateProfileFields.toEnglish(ethnicity, 'ethnicity');
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const token = jwt.sign(
-      { username, email, password: hashedPassword, phoneNumber, gender, country, DateOfBirth, ethnicity },
+      {
+        username,
+        email,
+        password: hashedPassword,
+        phoneNumber,
+        gender: genderEn,
+        country: countryEn,
+        DateOfBirth,
+        ethnicity: ethnicityEn
+      },
       JWT_SECRET,
       { expiresIn: '1h' }
     );
