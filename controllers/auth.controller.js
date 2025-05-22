@@ -102,53 +102,47 @@ export const signUpWithFacebook = async (req, res, next) => {
   }
 };
 
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import User from '../models/user.model.js';
+import { JWT_SECRET, JWT_EXPIRES_IN } from '../config/env.js';
+
 export const logIn = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
+  const t = (en, ar) => lang === 'ar' ? ar : en;
 
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
 
-    if (!user.isVerified) {
-  return res.status(403).json({ error: "Please verify your email." });
-}
-
-
     if (!user) {
-      return res.status(401).json({
-        error: lang === 'ar' ? "المستخدم غير موجود" : "User Not Found"
-      });
+      return res.status(401).json({ error: t("User Not Found", "المستخدم غير موجود") });
     }
 
+    // Reject if social auth
     if (user.authProvider !== "local") {
       return res.status(400).json({
-        error: lang === 'ar'
-          ? `يرجى تسجيل الدخول باستخدام ${user.authProvider}`
-          : `Please log in with ${user.authProvider}.`
+        error: t(`Please log in with ${user.authProvider}.`, `يرجى تسجيل الدخول باستخدام ${user.authProvider}`)
       });
     }
 
     // ✅ Require email verification
-    if (!user.isEmailVerified) {
+    if (!user.isVerified) {
       return res.status(403).json({
-        error: lang === 'ar'
-          ? "يرجى التحقق من بريدك الإلكتروني قبل تسجيل الدخول"
-          : "Please verify your email before logging in"
+        error: t("Please verify your email before logging in", "يرجى التحقق من بريدك الإلكتروني قبل تسجيل الدخول")
       });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({
-        error: lang === 'ar' ? "كلمة المرور غير صحيحة" : "Invalid password"
-      });
+      return res.status(401).json({ error: t("Invalid password", "كلمة المرور غير صحيحة") });
     }
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 
     res.status(201).json({
       success: true,
-      message: lang === 'ar' ? "تم تسجيل الدخول بنجاح" : "User logged in successfully",
+      message: t("User logged in successfully", "تم تسجيل الدخول بنجاح"),
       data: { token, user }
     });
 
@@ -156,6 +150,7 @@ export const logIn = async (req, res, next) => {
     next(error);
   }
 };
+
 export const loginWithGoogle = async (req, res, next) => {
   try {
     const { token } = req.body;
