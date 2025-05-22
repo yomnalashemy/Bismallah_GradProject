@@ -1,30 +1,24 @@
+// Example protect middleware
 import jwt from 'jsonwebtoken';
-import User from '../models/user.model.js'; // adjust path as needed
+import User from '../models/user.model.js';
+import { JWT_SECRET } from '../config/env.js';
 
 export const protect = async (req, res, next) => {
   try {
-    let token;
-
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith('Bearer')
-    ) {
-      token = req.headers.authorization.split(' ')[1];
-
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await User.findById(decoded.id);
-
-      if (!user) {
-        return res.status(401).json({ error: 'User not found' });
-      }
-
-      req.user = user; // This is essential
-      next();
-    } else {
-      return res.status(401).json({ error: 'Not authorized, no token' });
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Unauthorized" });
     }
-  } catch (error) {
-    return res.status(401).json({ error: 'Not authorized, token failed' });
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+    if (!user) return res.status(401).json({ error: "User not found" });
+
+    req.user = user; // 👈 this is the key
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: "Invalid token" });
   }
 };
 

@@ -109,7 +109,7 @@ export const resetPassword = async (req, res, next) => {
 export const getProfile = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   try {
-    const user = await User.findById(req.user._id).select('username DateOfBirth ethnicity email gender country phoneNumber profilePicture');
+    const user = await User.findById(req.user._id).select('username DateOfBirth ethnicity email gender country phoneNumber ');
     if (!user) return res.status(404).json({ error: t("User not found", "المستخدم غير موجود", lang) });
 
     res.status(200).json({
