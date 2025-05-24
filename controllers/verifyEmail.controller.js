@@ -11,9 +11,10 @@ export const verifyEmail = async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
+
     if (decoded.changeEmail) {
-   const user = await User.findById(decoded.userId);
-   if (!user) return res.status(404).send(t("User not found", "المستخدم غير موجود"));
+  const user = await User.findById(decoded.userId);
+  if (!user) return res.status(404).send(t("User not found", "المستخدم غير موجود"));
 
   user.email = decoded.email;
   await user.save();
