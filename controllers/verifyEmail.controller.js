@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 import { JWT_SECRET } from '../config/env.js';
+import { t } from '../utils/translationHelper.js'; // ensure it’s t(en, ar, lang)
 
 const renderVerificationPage = (title, message, token, lang) => `
   <!DOCTYPE html>
@@ -71,10 +72,9 @@ const renderVerificationPage = (title, message, token, lang) => `
 export const verifyEmail = async (req, res) => {
   const token = req.query.token;
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
-  const t = (en, ar) => lang === 'ar' ? ar : en;
 
   if (!token) {
-    return res.status(400).send(t("Missing token", "رمز التحقق مفقود"));
+    return res.status(400).send(t("Missing token", "رمز التحقق مفقود", lang));
   }
 
   try {
@@ -84,7 +84,7 @@ export const verifyEmail = async (req, res) => {
     if (decoded.changeEmail) {
       const user = await User.findById(decoded.userId);
       if (!user) {
-        return res.status(404).send(t("User not found", "المستخدم غير موجود"));
+        return res.status(404).send(t("User not found", "المستخدم غير موجود", lang));
       }
 
       user.email = decoded.email;
@@ -92,14 +92,14 @@ export const verifyEmail = async (req, res) => {
 
       res.setHeader('Content-Type', 'text/html');
       return res.send(renderVerificationPage(
-        t("Email Updated", "تم تحديث البريد الإلكتروني"),
-        t("✅ Your email has been updated successfully!", "✅ تم تحديث بريدك الإلكتروني بنجاح!"),
+        t("Email Updated", "تم تحديث البريد الإلكتروني", lang),
+        t("✅ Your email has been updated successfully!", "✅ تم تحديث بريدك الإلكتروني بنجاح!", lang),
         token,
         lang
       ));
     }
 
-    // ✅ Email signup verification flow
+    // ✅ Signup verification flow
     let existingUser = await User.findOne({ email: decoded.email });
 
     if (existingUser) {
@@ -124,14 +124,14 @@ export const verifyEmail = async (req, res) => {
 
     res.setHeader('Content-Type', 'text/html');
     return res.send(renderVerificationPage(
-      t("Email Verified", "تم التحقق من البريد الإلكتروني"),
-      t("✅ Your email has been verified!", "✅ تم التحقق من بريدك الإلكتروني!"),
+      t("Email Verified", "تم التحقق من البريد الإلكتروني", lang),
+      t("✅ Your email has been verified!", "✅ تم التحقق من بريدك الإلكتروني!", lang),
       token,
       lang
     ));
 
   } catch (err) {
     console.error("Email verification error:", err);
-    return res.status(400).send(t("Invalid or expired verification token", "رمز التحقق غير صالح أو منتهي الصلاحية"));
+    return res.status(400).send(t("Invalid or expired verification token", "رمز التحقق غير صالح أو منتهي الصلاحية", lang));
   }
 };
