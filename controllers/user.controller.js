@@ -154,7 +154,7 @@ export const editProfile = async (req, res, next) => {
       { expiresIn: '1h' }
       );
 
-     await sendEmailChangeVerificationLink(email, user.username, token);
+      await sendEmailChangeVerificationLink(email, user.username, token);
 
       return res.status(200).json({
         success: true,
