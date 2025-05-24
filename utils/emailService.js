@@ -85,35 +85,30 @@ export const sendEmailChangeVerificationLink = async (email, username, token) =>
   const mailOptions = {
     from: `Lupira <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: "Confirm Your New Email - Lupira",
+    subject: 'Confirm Your New Email - Lupira',
     html: `
       <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; line-height: 1.6;">
         <div style="background-color: #6A5ACD; color: #ffffff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
           <h1 style="margin: 0;">Confirm Your New Email</h1>
         </div>
-
         <div style="border: 1px solid #ddd; padding: 30px;">
           <p>Hello <strong>${username}</strong>,</p>
           <p>You recently requested to update your email address on <strong>Lupira</strong>. Please confirm your new email by clicking the button below:</p>
-
           <div style="text-align: center; margin: 30px 0;">
             <a href="${verifyUrl}" style="padding: 12px 24px; background-color: #28a745; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">
               Verify New Email
             </a>
           </div>
-
           <p>This link will expire in 1 hour. If you did not make this request, you can safely ignore this email.</p>
-
           <p style="margin-top: 30px;">Warm regards,<br><strong>The Lupira Team</strong></p>
         </div>
-
         <footer style="background-color: #f5f5f5; padding: 10px; text-align: center; color: #888; font-size: 12px;">
           © ${new Date().getFullYear()} Lupira. All rights reserved.
         </footer>
       </div>
-    `
+    `,
   };
 
   await transporter.sendMail(mailOptions);
-  console.log("Email change verification sent to:", email);
+  console.log('Email change verification sent to:', email);
 };

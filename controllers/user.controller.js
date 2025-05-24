@@ -124,77 +124,106 @@ export const getProfile = async (req, res, next) => {
 
 export const editProfile = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
-  const t = (en, ar) => lang === 'ar' ? ar : en;
+  const t = (en, ar) => (lang === 'ar' ? ar : en);
 
   try {
     const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ error: t("User not found", "المستخدم غير موجود") });
+    if (!user) {
+      return res.status(404).json({ error: t('User not found', 'المستخدم غير موجود') });
+    }
 
     const { username, email, DateOfBirth, gender, ethnicity, phoneNumber, country } = req.body;
 
+    // Handle username update
     if (username && username !== user.username) {
-      if (username.length < 5) return res.status(400).json({ error: t("Username must be at least 5 characters", "اسم المستخدم يجب أن لا يقل عن 5 حروف", lang) });
+      if (username.length < 5) {
+        return res.status(400).json({ error: t('Username must be at least 5 characters', 'اسم المستخدم يجب أن لا يقل عن 5 حروف') });
+      }
       const usernameRegex = /^[a-zA-Z0-9._]+$/;
-      if (!usernameRegex.test(username)) return res.status(400).json({ error: t("Invalid username format", "تنسيق اسم المستخدم غير صالح", lang) });
-
+      if (!usernameRegex.test(username)) {
+        return res.status(400).json({ error: t('Invalid username format', 'تنسيق اسم المستخدم غير صالح') });
+      }
       const existing = await User.findOne({ username });
-      if (existing) return res.status(409).json({ error: t("Username already taken", "اسم المستخدم مستخدم بالفعل", lang) });
+      if (existing) {
+        return res.status(409).json({ error: t('Username already taken', 'اسم المستخدم مستخدم بالفعل') });
+      }
       user.username = username;
     }
 
+    // Handle email change
     if (email && email !== user.email) {
       const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
-      if (!emailRegex.test(email)) return res.status(400).json({ error: t("Invalid email format", "تنسيق البريد الإلكتروني غير صالح", lang) });
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: t('Invalid email format', 'تنسيق البريد الإلكتروني غير صالح') });
+      }
 
-      const exists = await User.findOne({ email });
-      if (exists) return res.status(409).json({ error: t("Email already in use", "البريد الإلكتروني مستخدم بالفعل", lang) });
+      const existing = await User.findOne({ email });
+      if (existing) {
+        return res.status(409).json({ error: t('Email already in use', 'البريد الإلكتروني مستخدم بالفعل') });
+      }
 
-     const token = jwt.sign(
-     { changeEmail: true, userId: user._id, email },
-       JWT_SECRET,
-      { expiresIn: '1h' }
-     );
+      // Generate JWT token for email verification
+      const token = jwt.sign(
+        { changeEmail: true, userId: user._id, email },
+        JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+
+      // Send verification email to the new email address
       await sendEmailChangeVerificationLink(email, user.username, token);
+
       return res.status(200).json({
         success: true,
         message: t(
-          "A verification link has been sent to your new email. Please confirm it.",
-          "تم إرسال رابط التحقق إلى بريدك الجديد. يرجى تأكيده."
-        )
+          'A verification link has been sent to your new email. Please confirm it.',
+          'تم إرسال رابط التحقق إلى بريدك الجديد. يرجى تأكيده.'
+        ),
       });
     }
 
+    // Handle phone number update
     if (phoneNumber) {
       const parsedPhone = parsePhoneNumberFromString(phoneNumber);
-      if (!parsedPhone || !parsedPhone.isValid()) return res.status(400).json({ error: t("Invalid phone number", "رقم الهاتف غير صالح", lang) });
-
+      if (!parsedPhone || !parsedPhone.isValid()) {
+        return res.status(400).json({ error: t('Invalid phone number', 'رقم الهاتف غير صالح') });
+      }
       if (user.phoneNumber !== phoneNumber) {
         const exists = await User.findOne({ phoneNumber });
-        if (exists) return res.status(409).json({ error: t("Phone number already in use", "رقم الهاتف مستخدم بالفعل", lang) });
+        if (exists) {
+          return res.status(409).json({ error: t('Phone number already in use', 'رقم الهاتف مستخدم بالفعل') });
+        }
       }
       user.phoneNumber = phoneNumber;
     }
 
+    // Handle date of birth update
     if (DateOfBirth) {
       const dob = new Date(DateOfBirth);
-      if (dob > new Date()) return res.status(400).json({ error: t("Date of birth cannot be in the future", "تاريخ الميلاد لا يمكن أن يكون في المستقبل", lang) });
+      if (dob > new Date()) {
+        return res.status(400).json({ error: t('Date of birth cannot be in the future', 'تاريخ الميلاد لا يمكن أن يكون في المستقبل') });
+      }
       user.DateOfBirth = DateOfBirth;
     }
 
+    // Handle other fields
     if (gender) user.gender = translateProfileFields.toEnglish(gender, 'gender');
     if (ethnicity) user.ethnicity = translateProfileFields.toEnglish(ethnicity, 'ethnicity');
     if (country) user.country = translateProfileFields.toEnglish(country, 'country');
 
+    // Save updated user (excluding email, which is handled in verifyEmail)
     await user.save();
-    res.status(200).json({
+
+    return res.status(200).json({
       success: true,
-      message: t("Profile updated successfully", "تم تحديث الملف الشخصي بنجاح", lang),
-      data: translateProfileFields.toArabicIfNeeded(user, lang)
+      message: t('Profile updated successfully', 'تم تحديث الملف الشخصي بنجاح'),
+      data: translateProfileFields.toArabicIfNeeded(user, lang),
     });
   } catch (error) {
+    console.error('Profile update error:', error);
     next(error);
-  }
+  }
 };
+
 export const deleteAccount = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
 
