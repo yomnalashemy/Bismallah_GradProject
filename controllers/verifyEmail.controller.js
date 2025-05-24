@@ -7,49 +7,41 @@ export const verifyEmail = async (req, res) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   const t = (en, ar) => lang === 'ar' ? ar : en;
 
-  if (!token) {
-    return res.status(400).send(t("Missing token", "رمز التحقق مفقود", lang));
-  }
+  if (!token) return res.status(400).send(t("Missing token", "رمز التحقق مفقود"));
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-
-    // ✅ Handle email update
     if (decoded.changeEmail) {
-      const user = await User.findById(decoded.userId);
-      if (!user) return res.status(404).send(t("User not found", "المستخدم غير موجود", lang));
+   const user = await User.findById(decoded.userId);
+   if (!user) return res.status(404).send(t("User not found", "المستخدم غير موجود"));
 
-      user.email = decoded.email;
-      await user.save();
+   user.email = decoded.email;
+   await user.save();
 
-      return res.send(`
-        <!DOCTYPE html>
-        <html lang="${lang}">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>${t("Email Updated", "تم تحديث البريد الإلكتروني", lang)}</title>
-          <script>
-            window.location.href = "lupira://verify-email?token=${token}";
-            setTimeout(() => {
-              document.body.innerHTML = '<h2>${t("If the app didn\\'t open, please make sure it is installed.", "إذا لم يتم فتح التطبيق، يرجى التأكد من أنه مثبت.")}</h2>';
-            }, 3000);
-          </script>
-        </head>
-        <body>
-          <h2>${t("Your email has been updated successfully!", "تم تحديث بريدك الإلكتروني بنجاح!", lang)}</h2>
-          <p>${t("If nothing happens,", "إذا لم يحدث شيء،")} <a href="lupira://verify-email?token=${token}">${t("tap here", "اضغط هنا")}</a>.</p>
-        </body>
-        </html>
-      `); // ✅ Return prevents signup logic from running
-    }
-
-    // ✅ Handle signup email verification
-    let existingUser = await User.findOne({ email: decoded.email });
-
+   return res.send(`
+    <!DOCTYPE html>
+    <html lang="${lang}">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${t("Email Updated", "تم تحديث البريد الإلكتروني")}</title>
+      <script>
+        window.location.href = "lupira://verify-email?token=${token}";
+        setTimeout(() => {
+          document.body.innerHTML = '<h2>${t("If the app didn\\'t open, please make sure it is installed.", "إذا لم يتم فتح التطبيق، يرجى التأكد من أنه مثبت.")}</h2>';
+        }, 3000);
+      </script>
+    </head>
+    <body>
+      <h2>${t("Your email has been updated successfully!", "تم تحديث بريدك الإلكتروني بنجاح!")}</h2>
+      <p>${t("If nothing happens,", "إذا لم يحدث شيء،")} <a href="lupira://verify-email?token=${token}">${t("tap here", "اضغط هنا")}</a>.</p>
+    </body>
+    </html>
+  `);} 
+  let existingUser = await User.findOne({ email: decoded.email });
     if (existingUser) {
       if (!existingUser.isVerified) {
-        existingUser.isVerified = true;
+        existingUser.isVerified = true; 
         await existingUser.save();
       }
     } else {
@@ -66,14 +58,13 @@ export const verifyEmail = async (req, res) => {
         isVerified: true
       });
     }
-
-    return res.send(`
+    res.send(`
       <!DOCTYPE html>
       <html lang="${lang}">
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${t("Email Verified", "تم التحقق من البريد الإلكتروني", lang)}</title>
+        <title>${t("Email Verified", "تم التحقق من البريد الإلكتروني")}</title>
         <script>
           window.location.href = "lupira://verify-email?token=${token}";
           setTimeout(() => {
@@ -82,14 +73,13 @@ export const verifyEmail = async (req, res) => {
         </script>
       </head>
       <body>
-        <h2>${t("Your email has been verified!", "تم التحقق من بريدك الإلكتروني!", lang)}</h2>
+        <h2>${t("Your email has been verified!", "تم التحقق من بريدك الإلكتروني!")}</h2>
         <p>${t("If nothing happens,", "إذا لم يحدث شيء،")} <a href="lupira://verify-email?token=${token}">${t("tap here", "اضغط هنا")}</a>.</p>
       </body>
       </html>
     `);
-
   } catch (err) {
     console.error("Email verification error:", err);
-    return res.status(400).send(t("Invalid or expired verification token", "رمز التحقق غير صالح أو منتهي الصلاحية", lang));
+    return res.status(400).send(t("Invalid or expired verification token", "رمز التحقق غير صالح أو منتهي الصلاحية"));
   }
 };

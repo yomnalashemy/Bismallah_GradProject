@@ -121,6 +121,7 @@ export const getProfile = async (req, res, next) => {
     next(error);
   }
 };
+
 export const editProfile = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   const t = (en, ar) => lang === 'ar' ? ar : en;
@@ -149,13 +150,11 @@ export const editProfile = async (req, res, next) => {
       if (exists) return res.status(409).json({ error: t("Email already in use", "البريد الإلكتروني مستخدم بالفعل", lang) });
 
      const token = jwt.sign(
-      { changeEmail: true, userId: user._id},
-        JWT_SECRET,
+     { changeEmail: true, userId: user._id, email },
+       JWT_SECRET,
       { expiresIn: '1h' }
-      );
-
-    await sendEmailChangeVerificationLink(email, user.username, token);
-
+     );
+      await sendEmailChangeVerificationLink(email, user.username, token);
       return res.status(200).json({
         success: true,
         message: t(
