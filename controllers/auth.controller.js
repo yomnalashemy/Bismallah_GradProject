@@ -49,7 +49,7 @@ export const signUp = async (req, res, next) => {
       return res.status(409).json({ error: t("Username or email already in use", "اسم المستخدم أو البريد الإلكتروني مستخدم بالفعل") });
     }
 
-    // ✅ Translate values to English if in Arabic
+    // Translate values to English if in Arabic
     const genderEn = translateProfileFields.toEnglish(gender, 'gender');
     const countryEn = translateProfileFields.toEnglish(country, 'country');
     const ethnicityEn = translateProfileFields.toEnglish(ethnicity, 'ethnicity');

@@ -49,7 +49,7 @@ export const verifyEmail = async (req, res) => {
         </script>
       </head>
       <body>
-        <h2>${t("✅ Your email has been verified!", "✅ تم التحقق من بريدك الإلكتروني!")}</h2>
+        <h2>${t("Your email has been verified!", "تم التحقق من بريدك الإلكتروني!")}</h2>
         <p>${t("If nothing happens,", "إذا لم يحدث شيء،")} <a href="lupira://verify-email?token=${token}">${t("tap here", "اضغط هنا")}</a>.</p>
       </body>
       </html>
