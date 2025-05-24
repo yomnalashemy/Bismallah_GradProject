@@ -123,12 +123,14 @@ export const getProfile = async (req, res, next) => {
 };
 
 export const editProfile = async (req, res, next) => {
-  const lang = req.query.lang === 'ar' ? 'ar' : 'en';
+  const lang = (req.query.lang || '').toLowerCase() === 'ar' ? 'ar' : 'en';
+  console.log('editProfile - Received lang:', req.query.lang, 'Resolved lang:', lang); // Debug log
   const t = (en, ar) => (lang === 'ar' ? ar : en);
 
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
+      console.log('editProfile - User not found:', req.user._id);
       return res.status(404).json({ error: t('User not found', 'المستخدم غير موجود') });
     }
 
@@ -152,13 +154,14 @@ export const editProfile = async (req, res, next) => {
 
     // Handle email change
     if (email && email !== user.email) {
+      console.log('editProfile - Attempting email change to:', email);
       const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
       if (!emailRegex.test(email)) {
         return res.status(400).json({ error: t('Invalid email format', 'تنسيق البريد الإلكتروني غير صالح') });
       }
 
-      const existing = await User.findOne({ email });
-      if (existing) {
+      const exists = await User.findOne({ email });
+      if (exists) {
         return res.status(409).json({ error: t('Email already in use', 'البريد الإلكتروني مستخدم بالفعل') });
       }
 
@@ -169,9 +172,10 @@ export const editProfile = async (req, res, next) => {
         { expiresIn: '1h' }
       );
 
-      // Send verification email to the new email address
-      await sendEmailChangeVerificationLink(email, user.username, token);
-
+      // Send verification email
+      console.log('editProfile - Sending verification email to:', email, 'Language:', lang);
+      await sendEmailChangeVerificationLink(email, user.username, token, lang);
+      console.log('editProfile - Verification email sent, exiting');
       return res.status(200).json({
         success: true,
         message: t(
@@ -211,6 +215,7 @@ export const editProfile = async (req, res, next) => {
     if (country) user.country = translateProfileFields.toEnglish(country, 'country');
 
     // Save updated user (excluding email, which is handled in verifyEmail)
+    console.log('editProfile - Saving user with updates (excluding email):', user);
     await user.save();
 
     return res.status(200).json({
@@ -219,7 +224,7 @@ export const editProfile = async (req, res, next) => {
       data: translateProfileFields.toArabicIfNeeded(user, lang),
     });
   } catch (error) {
-    console.error('Profile update error:', error);
+    console.error('editProfile - Error:', error);
     next(error);
   }
 };

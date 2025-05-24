@@ -79,36 +79,45 @@ export const sendResetPasswordEmail = async (email, username, resetToken) => {
     await transporter.sendMail(mailOptions);
 };
 
-export const sendEmailChangeVerificationLink = async (email, username, token) => {
-  const verifyUrl = `https://lupira.onrender.com/api/auth/verify-email?token=${encodeURIComponent(token)}`;
+export const sendEmailChangeVerificationLink = async (email, username, token, lang = 'en') => {
+  const verifyUrl = `https://lupira.onrender.com/api/auth/verify-email?token=${encodeURIComponent(token)}&lang=${lang}`;
+  const t = (en, ar) => (lang === 'ar' ? ar : en);
+
+  console.log('sendEmailChangeVerificationLink - Sending email to:', email, 'Language:', lang); // Debug log
 
   const mailOptions = {
     from: `Lupira <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: 'Confirm Your New Email - Lupira',
+    subject: t('Confirm Your New Email - Lupira', 'تأكيد بريدك الإلكتروني الجديد - لوبيرا'),
     html: `
-      <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; line-height: 1.6;">
+      <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; line-height: 1.6; direction: ${lang === 'ar' ? 'rtl' : 'ltr'};">
         <div style="background-color: #6A5ACD; color: #ffffff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-          <h1 style="margin: 0;">Confirm Your New Email</h1>
+          <h1 style="margin: 0;">${t('Confirm Your New Email', 'تأكيد بريدك الإلكتروني الجديد')}</h1>
         </div>
         <div style="border: 1px solid #ddd; padding: 30px;">
-          <p>Hello <strong>${username}</strong>,</p>
-          <p>You recently requested to update your email address on <strong>Lupira</strong>. Please confirm your new email by clicking the button below:</p>
+          <p>${t('Hello', 'مرحبًا')} <strong>${username}</strong>,</p>
+          <p>${t(
+            'You recently requested to update your email address on <strong>Lupira</strong>. Please confirm your new email by clicking the button below:',
+            'لقد طلبت مؤخرًا تحديث عنوان بريدك الإلكتروني على <strong>لوبيرا</strong>. يرجى تأكيد بريدك الإلكتروني الجديد بالنقر على الزر أدناه:'
+          )}</p>
           <div style="text-align: center; margin: 30px 0;">
             <a href="${verifyUrl}" style="padding: 12px 24px; background-color: #28a745; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">
-              Verify New Email
+              ${t('Verify New Email', 'تأكيد البريد الإلكتروني الجديد')}
             </a>
           </div>
-          <p>This link will expire in 1 hour. If you did not make this request, you can safely ignore this email.</p>
-          <p style="margin-top: 30px;">Warm regards,<br><strong>The Lupira Team</strong></p>
+          <p>${t(
+            'This link will expire in 1 hour. If you did not make this request, you can safely ignore this email.',
+            'ستنتهي صلاحية هذا الرابط خلال ساعة واحدة. إذا لم تقم بهذا الطلب، يمكنك تجاهل هذا البريد الإلكتروني بأمان.'
+          )}</p>
+          <p style="margin-top: 30px;">${t('Warm regards,', 'مع أطيب التحيات،')}<br><strong>${t('The Lupira Team', 'فريق لوبيرا')}</strong></p>
         </div>
         <footer style="background-color: #f5f5f5; padding: 10px; text-align: center; color: #888; font-size: 12px;">
-          © ${new Date().getFullYear()} Lupira. All rights reserved.
+          © ${new Date().getFullYear()} Lupira. ${t('All rights reserved.', 'جميع الحقوق محفوظة.')}
         </footer>
       </div>
     `,
   };
 
   await transporter.sendMail(mailOptions);
-  console.log('Email change verification sent to:', email);
+  console.log('sendEmailChangeVerificationLink - Email sent to:', email);
 };

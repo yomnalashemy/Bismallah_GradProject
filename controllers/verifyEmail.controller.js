@@ -1,7 +1,11 @@
+import jwt from 'jsonwebtoken';
+import User from '../models/user.model.js';
+import { JWT_SECRET } from '../config/env.js';
+
 export const verifyEmail = async (req, res) => {
   const token = req.query.token;
   const lang = (req.query.lang || '').toLowerCase() === 'ar' ? 'ar' : 'en';
-  console.log('Language parameter:', req.query.lang, 'Resolved lang:', lang); // Debug log
+  console.log('verifyEmail - Language parameter:', req.query.lang, 'Resolved lang:', lang); // Debug log
   const t = (en, ar) => (lang === 'ar' ? ar.replace(/'/g, "\\'") : en.replace(/'/g, "\\'"));
 
   if (!token) {
@@ -24,6 +28,7 @@ export const verifyEmail = async (req, res) => {
         return res.status(409).send(t('Email already in use', 'البريد الإلكتروني مستخدم بالفعل'));
       }
 
+      console.log('verifyEmail - Updating email for user:', user._id, 'to:', decoded.email);
       user.email = decoded.email;
       await user.save();
 
@@ -109,7 +114,7 @@ export const verifyEmail = async (req, res) => {
       `);
     }
   } catch (err) {
-    console.error('Email verification error:', err);
+    console.error('verifyEmail - Error:', err);
     return res.status(400).send(t('Invalid or expired verification token', 'رمز التحقق غير صالح أو منتهي الصلاحية'));
   }
 };
