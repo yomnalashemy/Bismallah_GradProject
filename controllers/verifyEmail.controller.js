@@ -48,7 +48,7 @@ const renderVerificationPage = (title, message, token, lang) => `
       window.onload = function() {
         window.location.href = "lupira://verify-email?token=${token}";
         setTimeout(() => {
-          document.getElementById('fallback').style.display = 'block';
+          document.getElementById('fallback').style.display = 'inline-block';
         }, 3000);
       }
     </script>
@@ -73,7 +73,9 @@ export const verifyEmail = async (req, res) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   const t = (en, ar) => lang === 'ar' ? ar : en;
 
-  if (!token) return res.status(400).send(t("Missing token", "رمز التحقق مفقود"));
+  if (!token) {
+    return res.status(400).send(t("Missing token", "رمز التحقق مفقود"));
+  }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -81,11 +83,14 @@ export const verifyEmail = async (req, res) => {
     // ✅ Email change flow
     if (decoded.changeEmail) {
       const user = await User.findById(decoded.userId);
-      if (!user) return res.status(404).send(t("User not found", "المستخدم غير موجود"));
+      if (!user) {
+        return res.status(404).send(t("User not found", "المستخدم غير موجود"));
+      }
 
       user.email = decoded.email;
       await user.save();
 
+      res.setHeader('Content-Type', 'text/html');
       return res.send(renderVerificationPage(
         t("Email Updated", "تم تحديث البريد الإلكتروني"),
         t("✅ Your email has been updated successfully!", "✅ تم تحديث بريدك الإلكتروني بنجاح!"),
@@ -117,6 +122,7 @@ export const verifyEmail = async (req, res) => {
       });
     }
 
+    res.setHeader('Content-Type', 'text/html');
     return res.send(renderVerificationPage(
       t("Email Verified", "تم التحقق من البريد الإلكتروني"),
       t("✅ Your email has been verified!", "✅ تم التحقق من بريدك الإلكتروني!"),
