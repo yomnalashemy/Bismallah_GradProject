@@ -46,6 +46,7 @@ export const changePassword = async (req, res, next) => {
   }
 };
 
+
 export const forgotPassword = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   try {
