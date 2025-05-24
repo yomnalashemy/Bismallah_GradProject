@@ -12,7 +12,7 @@ import { t, translateProfileFields } from '../utils/translationHelper.js';
 export const signUp = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   const t = (en, ar) => lang === 'ar' ? ar : en;
-
+  
   try {
     const {
       username,
@@ -25,6 +25,8 @@ export const signUp = async (req, res, next) => {
       DateOfBirth,
       ethnicity
     } = req.body;
+
+    
 
     if (!username || username.length < 5)
       return res.status(400).json({ error: t("Username must be at least 5 characters", "اسم المستخدم يجب أن يكون 5 أحرف على الأقل") });
@@ -44,9 +46,17 @@ export const signUp = async (req, res, next) => {
     if (!passwordRegex.test(password))
       return res.status(400).json({ error: t("Password must include uppercase, lowercase, number, and symbol", "يجب أن تحتوي كلمة المرور على حرف كبير وصغير ورقم ورمز") });
 
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-    if (existingUser) {
-      return res.status(409).json({ error: t("Username or email already in use", "اسم المستخدم أو البريد الإلكتروني مستخدم بالفعل") });
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(409).json({ error: t("Email already in use", "اسم المستخدم أو البريد الإلكتروني مستخدم بالفعل") });
+    }
+    const existingPhone = await User.findOne({ phoneNumber});
+    if (existingPhone) {
+      return res.status(409).json({ error: t("Phone Number already in use", "رقم الهاتف مستخدم بالفعل") });
+    }
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
+      return res.status(409).json({ error: t("Username already in use", "اسم المستخدم مستخدم بالفعل") });
     }
 
     // Translate values to English if in Arabic
