@@ -79,33 +79,24 @@ export const sendResetPasswordEmail = async (email, username, resetToken) => {
     await transporter.sendMail(mailOptions);
 };
 
-export const sendEmailChangeVerificationLink = async (email, userId) => {
-  const token = jwt.sign({ userId, email, changeEmail: true }, JWT_SECRET, { expiresIn: '1h' });
+export const sendEmailChangeVerificationLink = async (email, username, token) => {
   const verifyUrl = `https://lupira.onrender.com/api/auth/verify-email?token=${encodeURIComponent(token)}`;
-
   const mailOptions = {
     from: `Lupira <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: "Confirm Your New Email",
+    subject: "Verify Your New Email - Lupira",
     html: `
-      <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; line-height: 1.6;">
-        <div style="background-color: #6A5ACD; color: #ffffff; padding: 15px; text-align: center; border-radius: 8px 8px 0 0;">
-          <h1>Confirm Email Change</h1>
-        </div>
-        <div style="border: 1px solid #ddd; padding: 20px;">
-          <p>Hello,</p>
-          <p>You requested to change your email on <strong>Lupira</strong>. Please confirm it by clicking below:</p>
-          <a href="${verifyUrl}" style="display:inline-block; margin-top:15px; padding:10px 15px; background-color: #6A5ACD; color:#ffffff; text-decoration:none; border-radius:5px;">
-            Confirm New Email
-          </a>
-          <p>This link is valid for 1 hour.</p>
-        </div>
-        <footer style="background-color: #f5f5f5; padding: 10px; text-align: center; color: #888; font-size: 12px;">
-          © ${new Date().getFullYear()} Lupira. All rights reserved.
-        </footer>
+      <div style="font-family: Arial; max-width: 600px; margin: auto;">
+        <h2>Hi ${username},</h2>
+        <p>Click the button below to confirm your new email address.</p>
+        <a href="${verifyUrl}" style="padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px;">
+          Verify New Email
+        </a>
+        <p>This link will expire in 1 hour.</p>
       </div>
     `
   };
 
   await transporter.sendMail(mailOptions);
+  console.log("Email change verification sent to:", email);
 };

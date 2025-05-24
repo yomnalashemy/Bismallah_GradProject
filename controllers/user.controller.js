@@ -147,7 +147,13 @@ export const editProfile = async (req, res, next) => {
       const exists = await User.findOne({ email });
       if (exists) return res.status(409).json({ error: t("Email already in use", "البريد الإلكتروني مستخدم بالفعل", lang) });
 
-      await sendEmailChangeVerificationLink(email, user._id);
+     const token = jwt.sign(
+      { changeEmail: true, userId: user._id, email },
+        JWT_SECRET,
+      { expiresIn: '1h' }
+      );
+
+     await sendEmailChangeVerificationLink(email, user.username, token);
 
       return res.status(200).json({
         success: true,
