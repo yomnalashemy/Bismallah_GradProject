@@ -1,11 +1,8 @@
-import jwt from 'jsonwebtoken';
-import User from '../models/user.model.js';
-import { JWT_SECRET } from '../config/env.js';
-
 export const verifyEmail = async (req, res) => {
   const token = req.query.token;
-  const lang = req.query.lang === 'ar' ? 'ar' : 'en';
-  const t = (en, ar) => (lang === 'ar' ? ar : en);
+  const lang = (req.query.lang || '').toLowerCase() === 'ar' ? 'ar' : 'en';
+  console.log('Language parameter:', req.query.lang, 'Resolved lang:', lang); // Debug log
+  const t = (en, ar) => (lang === 'ar' ? ar.replace(/'/g, "\\'") : en.replace(/'/g, "\\'"));
 
   if (!token) {
     return res.status(400).send(t('Missing token', 'رمز التحقق مفقود'));
@@ -14,20 +11,19 @@ export const verifyEmail = async (req, res) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
 
+    res.set('Content-Type', 'text/html; charset=UTF-8'); // Ensure UTF-8 encoding
+
     if (decoded.changeEmail) {
-      // Handle email change verification
       const user = await User.findById(decoded.userId);
       if (!user) {
         return res.status(404).send(t('User not found', 'المستخدم غير موجود'));
       }
 
-      // Check if the new email is already in use by another user
       const existingUser = await User.findOne({ email: decoded.email });
       if (existingUser && existingUser._id.toString() !== user._id.toString()) {
         return res.status(409).send(t('Email already in use', 'البريد الإلكتروني مستخدم بالفعل'));
       }
 
-      // Update the user's email
       user.email = decoded.email;
       await user.save();
 
@@ -39,18 +35,21 @@ export const verifyEmail = async (req, res) => {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>${t('Email Updated', 'تم تحديث البريد الإلكتروني')}</title>
           <script>
-            window.location.href = "lupira://verify-email?token=${token}";
+            window.location.href = "lupira://verify-email?token=${encodeURIComponent(token)}";
             setTimeout(() => {
               document.body.innerHTML = '<h2>${t(
                 "If the app didn't open, please make sure it is installed.",
                 'إذا لم يتم فتح التطبيق، يرجى التأكد من أنه مثبت.'
-              )}</h2>';
+              )}</h2><p>${t(
+                'Copy this link if needed: ',
+                'انسخ هذا الرابط إذا لزم الأمر: '
+              )}<code>lupira://verify-email?token=${encodeURIComponent(token)}</code></p>';
             }, 3000);
           </script>
         </head>
         <body>
           <h2>${t('Your email has been updated successfully!', 'تم تحديث بريدك الإلكتروني بنجاح!')}</h2>
-          <p>${t('If nothing happens,', 'إذا لم يحدث شيء،')} <a href="lupira://verify-email?token=${token}">${t(
+          <p>${t('If nothing happens,', 'إذا لم يحدث شيء،')} <a href="lupira://verify-email?token=${encodeURIComponent(token)}">${t(
             'tap here',
             'اضغط هنا'
           )}</a>.</p>
@@ -58,7 +57,6 @@ export const verifyEmail = async (req, res) => {
         </html>
       `);
     } else {
-      // Handle signup verification
       let existingUser = await User.findOne({ email: decoded.email });
       if (existingUser) {
         if (!existingUser.isVerified) {
@@ -88,18 +86,21 @@ export const verifyEmail = async (req, res) => {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>${t('Email Verified', 'تم التحقق من البريد الإلكتروني')}</title>
           <script>
-            window.location.href = "lupira://verify-email?token=${token}";
+            window.location.href = "lupira://verify-email?token=${encodeURIComponent(token)}";
             setTimeout(() => {
               document.body.innerHTML = '<h2>${t(
                 "If the app didn't open, please make sure it is installed.",
                 'إذا لم يتم فتح التطبيق، يرجى التأكد من أنه مثبت.'
-              )}</h2>';
+              )}</h2><p>${t(
+                'Copy this link if needed: ',
+                'انسخ هذا الرابط إذا لزم الأمر: '
+              )}<code>lupira://verify-email?token=${encodeURIComponent(token)}</code></p>';
             }, 3000);
           </script>
         </head>
         <body>
           <h2>${t('Your email has been verified!', 'تم التحقق من بريدك الإلكتروني!')}</h2>
-          <p>${t('If nothing happens,', 'إذا لم يحدث شيء،')} <a href="lupira://verify-email?token=${token}">${t(
+          <p>${t('If nothing happens,', 'إذا لم يحدث شيء،')} <a href="lupira://verify-email?token=${encodeURIComponent(token)}">${t(
             'tap here',
             'اضغط هنا'
           )}</a>.</p>
