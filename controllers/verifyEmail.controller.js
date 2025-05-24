@@ -41,8 +41,7 @@ export const verifyEmail = async (req, res) => {
   `);
 }
 
-
-    let existingUser = await User.findOne({ email: decoded.email });
+let existingUser = await User.findOne({ email: decoded.email });
 
     if (existingUser) {
       if (!existingUser.isVerified) {
