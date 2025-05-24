@@ -9,36 +9,38 @@ import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 export const changePassword = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
+  const t = (en, ar) => lang === 'ar' ? ar : en;
+
   const { oldPassword, newPassword, confirmNewPassword } = req.body;
 
   if (!oldPassword || !newPassword || !confirmNewPassword) {
-    return res.status(400).json({ error: t("Please provide all password fields.", "يرجى إدخال جميع حقول كلمة المرور.", lang) });
+    return res.status(400).json({ error: t("Please provide all password fields.", "يرجى إدخال جميع حقول كلمة المرور.") });
   }
 
   if (newPassword !== confirmNewPassword) {
-    return res.status(400).json({ error: t("New passwords do not match.", "كلمتا المرور غير متطابقتين.", lang) });
+    return res.status(400).json({ error: t("New passwords do not match.", "كلمتا المرور غير متطابقتين.") });
   }
 
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
   if (!passwordRegex.test(newPassword)) {
-    return res.status(400).json({ error: t("Password must meet complexity requirements.", "يجب أن تحتوي كلمة المرور على تعقيد كافٍ.", lang) });
+    return res.status(400).json({ error: t("Password must meet complexity requirements.", "يجب أن تحتوي كلمة المرور على تعقيد كافٍ.") });
   }
 
   try {
     const user = await User.findById(req.user._id).select('+password +authProvider');
-    if (!user) return res.status(404).json({ error: t("User not found.", "المستخدم غير موجود.", lang) });
+    if (!user) return res.status(404).json({ error: t("User not found.", "المستخدم غير موجود.") });
 
     if (user.authProvider !== "local") {
-      return res.status(400).json({ error: t("Use the original login provider.", "يرجى استخدام مزود تسجيل الدخول الأصلي.", lang) });
+      return res.status(400).json({ error: t("Use the original login provider.", "يرجى استخدام مزود تسجيل الدخول الأصلي.") });
     }
 
     const match = await bcrypt.compare(oldPassword, user.password);
-    if (!match) return res.status(401).json({ error: t("Old password incorrect.", "كلمة المرور القديمة غير صحيحة.", lang) });
+    if (!match) return res.status(401).json({ error: t("Old password incorrect.", "كلمة المرور القديمة غير صحيحة.") });
 
     user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
-    res.status(200).json({ success: true, message: t("Password updated.", "تم تحديث كلمة المرور.", lang) });
+    res.status(200).json({ success: true, message: t("Password updated.", "تم تحديث كلمة المرور.") });
   } catch (error) {
     next(error);
   }
