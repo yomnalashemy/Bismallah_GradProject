@@ -1,105 +1,46 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 import { JWT_SECRET } from '../config/env.js';
-import { t } from '../utils/translationHelper.js'; // ensure it’s t(en, ar, lang)
-
-const renderVerificationPage = (title, message, token, lang) => `
-  <!DOCTYPE html>
-  <html lang="${lang}">
-  <head>
-    <meta charset="UTF-8">
-    <title>${title}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        background-color: #f9f9f9;
-        text-align: center;
-        padding: 50px 20px;
-        color: #333;
-      }
-      .card {
-        background: #fff;
-        padding: 30px;
-        margin: auto;
-        max-width: 500px;
-        border-radius: 10px;
-        box-shadow: 0 0 20px rgba(0,0,0,0.08);
-      }
-      h2 {
-        color: #6A5ACD;
-      }
-      a.button {
-        display: inline-block;
-        margin-top: 20px;
-        padding: 12px 24px;
-        background-color: #6A5ACD;
-        color: white;
-        text-decoration: none;
-        border-radius: 6px;
-        font-weight: bold;
-      }
-      p.note {
-        margin-top: 30px;
-        color: #777;
-        font-size: 14px;
-      }
-    </style>
-    <script>
-      window.onload = function() {
-        window.location.href = "lupira://verify-email?token=${token}";
-        setTimeout(() => {
-          document.getElementById('fallback').style.display = 'inline-block';
-        }, 3000);
-      }
-    </script>
-  </head>
-  <body>
-    <div class="card">
-      <h2>${title}</h2>
-      <p>${message}</p>
-      <a id="fallback" href="lupira://verify-email?token=${token}" class="button" style="display:none;">
-        ${lang === 'ar' ? 'اضغط لفتح التطبيق' : 'Tap to open app'}
-      </a>
-      <p class="note">
-        ${lang === 'ar' ? 'إذا لم يتم فتح التطبيق تلقائيًا، يمكنك الضغط على الزر أعلاه.' : 'If the app doesn\'t open automatically, tap the button above.'}
-      </p>
-    </div>
-  </body>
-  </html>
-`;
 
 export const verifyEmail = async (req, res) => {
   const token = req.query.token;
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
+  const t = (en, ar) => lang === 'ar' ? ar : en;
 
-  if (!token) {
-    return res.status(400).send(t("Missing token", "رمز التحقق مفقود", lang));
-  }
+  if (!token) return res.status(400).send(t("Missing token", "رمز التحقق مفقود"));
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-
-    // ✅ Email change flow
     if (decoded.changeEmail) {
-      const user = await User.findById(decoded.userId);
-      if (!user) {
-        return res.status(404).send(t("User not found", "المستخدم غير موجود", lang));
-      }
+   const user = await User.findById(decoded.userId);
+   if (!user) return res.status(404).send(t("User not found", "المستخدم غير موجود"));
 
-      user.email = decoded.email;
-      await user.save();
+  user.email = decoded.email;
+  await user.save();
 
-      res.setHeader('Content-Type', 'text/html');
-      return res.send(renderVerificationPage(
-        t("Email Updated", "تم تحديث البريد الإلكتروني", lang),
-        t("✅ Your email has been updated successfully!", "✅ تم تحديث بريدك الإلكتروني بنجاح!", lang),
-        token,
-        lang
-      ));
-    }
+  return res.send(`
+    <!DOCTYPE html>
+    <html lang="${lang}">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${t("Email Updated", "تم تحديث البريد الإلكتروني")}</title>
+      <script>
+        window.location.href = "lupira://verify-email?token=${token}";
+        setTimeout(() => {
+          document.body.innerHTML = '<h2>${t("If the app didn\\'t open, please make sure it is installed.", "إذا لم يتم فتح التطبيق، يرجى التأكد من أنه مثبت.")}</h2>';
+        }, 3000);
+      </script>
+    </head>
+    <body>
+      <h2>${t("Your email has been updated successfully!", "تم تحديث بريدك الإلكتروني بنجاح!")}</h2>
+      <p>${t("If nothing happens,", "إذا لم يحدث شيء،")} <a href="lupira://verify-email?token=${token}">${t("tap here", "اضغط هنا")}</a>.</p>
+    </body>
+    </html>
+  `);
+}
 
-    // ✅ Signup verification flow
+
     let existingUser = await User.findOne({ email: decoded.email });
 
     if (existingUser) {
@@ -122,16 +63,28 @@ export const verifyEmail = async (req, res) => {
       });
     }
 
-    res.setHeader('Content-Type', 'text/html');
-    return res.send(renderVerificationPage(
-      t("Email Verified", "تم التحقق من البريد الإلكتروني", lang),
-      t("✅ Your email has been verified!", "✅ تم التحقق من بريدك الإلكتروني!", lang),
-      token,
-      lang
-    ));
-
+    res.send(`
+      <!DOCTYPE html>
+      <html lang="${lang}">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${t("Email Verified", "تم التحقق من البريد الإلكتروني")}</title>
+        <script>
+          window.location.href = "lupira://verify-email?token=${token}";
+          setTimeout(() => {
+            document.body.innerHTML = '<h2>${t("If the app didn\\'t open, please make sure it is installed.", "إذا لم يتم فتح التطبيق، يرجى التأكد من أنه مثبت.")}</h2>';
+          }, 3000);
+        </script>
+      </head>
+      <body>
+        <h2>${t("Your email has been verified!", "تم التحقق من بريدك الإلكتروني!")}</h2>
+        <p>${t("If nothing happens,", "إذا لم يحدث شيء،")} <a href="lupira://verify-email?token=${token}">${t("tap here", "اضغط هنا")}</a>.</p>
+      </body>
+      </html>
+    `);
   } catch (err) {
     console.error("Email verification error:", err);
-    return res.status(400).send(t("Invalid or expired verification token", "رمز التحقق غير صالح أو منتهي الصلاحية", lang));
+    return res.status(400).send(t("Invalid or expired verification token", "رمز التحقق غير صالح أو منتهي الصلاحية"));
   }
 };
