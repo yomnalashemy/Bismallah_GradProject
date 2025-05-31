@@ -8,6 +8,8 @@ import { sendEmailVerificationLink } from '../utils/emailService.js';
 import { parsePhoneNumberFromString } from 'libphonenumber-js'; // FOR VALID PHONE NUMBERS
 import {JWT_SECRET, JWT_EXPIRES_IN} from '../config/env.js';
 import { t, translateProfileFields } from '../utils/translationHelper.js';
+
+
 export const signUp = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   const t = (en, ar) => lang === 'ar' ? ar : en;
@@ -165,7 +167,7 @@ export const logIn = async (req, res, next) => {
       });
     }
 
-    // ✅ Require email verification
+    // Require email verification
     if (!user.isVerified) {
       return res.status(403).json({
         error: t("Please verify your email before logging in", "يرجى التحقق من بريدك الإلكتروني قبل تسجيل الدخول")

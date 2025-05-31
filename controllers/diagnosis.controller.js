@@ -63,6 +63,7 @@ export const getDetectionHistory = async (req, res, next) => {
     next(error);
   }
 };
+
 export const submitResponsesAndDiagnose = async (req, res, next) => {
   try {
     const userId = req.user._id;
@@ -215,7 +216,7 @@ export const submitResponsesAndDiagnose = async (req, res, next) => {
 
     const message = diagnosisResult === 1
       ? (lang === 'ar' ? "تحليلنا يشير إلى احتمالية وجود الذئبة" : "Our analysis indicates a potential presence of lupus")
-      : (lang === 'ar' ? "كل شيء سليم! لم يتم الكشف عن علامات الذئبة" : "You're all clear! No signs of lupus are detected.");
+      : (lang === 'ar' ? "كل شيء على ما يرام! لم يتم الكشف عن علامات الذئبة" : "You're all clear! No signs of lupus are detected.");
 
     res.status(201).json({
       success: true,
