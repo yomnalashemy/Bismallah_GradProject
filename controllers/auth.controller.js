@@ -41,7 +41,7 @@ export const signUp = async (req, res, next) => {
       return res.status(400).json({ error: t("Invalid email", "البريد الإلكتروني غير صالح") });
 
     if (password !== confirmPassword)
-      return res.status(400).json({ error: t("Passwords do not match", "كلمتا المرور غير متطابقتين") });
+      return res.status(400).json({ error: t("Passwords must match", "كلمتا المرور يجب أن تتطابق") });
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     if (!passwordRegex.test(password))
