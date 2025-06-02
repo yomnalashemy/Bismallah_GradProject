@@ -153,13 +153,23 @@ export const login = async (req, res, next) => {
   const t = (en, ar) => lang === 'ar' ? ar : en;
 
   try {
+    console.log('Raw request body:', req.body);
+    console.log('bcrypt version:', require('bcrypt/package.json').version);
     const { email, password } = req.body;
+    const trimmedPassword = password.trim(); // Remove leading/trailing whitespace
     console.log('Email:', email);
-    console.log('Received password:', password);
-    const user = await User.findOne({ email }).select('+password');
+    console.log('Received password:', trimmedPassword);
 
+    const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(401).json({ error: t("User Not Found", "المستخدم غير موجود") });
+    }
+
+    // Check if stored password looks like a valid bcrypt hash
+    console.log('Stored hash:', user.password);
+    if (!user.password || !user.password.startsWith('$2b$')) {
+      console.log('Invalid hash format for user:', email);
+      return res.status(500).json({ error: t("Invalid password hash in database", "تجزئة كلمة المرور غير صالحة في قاعدة البيانات") });
     }
 
     // Reject if social auth
@@ -176,8 +186,7 @@ export const login = async (req, res, next) => {
       });
     }
 
-    console.log('Stored hash:', user.password);
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(trimmedPassword, user.password);
     console.log('Password valid:', isPasswordValid);
     if (!isPasswordValid) {
       return res.status(401).json({ error: t("Invalid password", "كلمة المرور غير صحيحة") });
@@ -192,6 +201,7 @@ export const login = async (req, res, next) => {
     });
 
   } catch (error) {
+    console.error('Login error:', error);
     next(error);
   }
 };
