@@ -9,11 +9,10 @@ import authRouter from './routes/auth.routes.js';
 import userRouter from './routes/user.routes.js';
 import diagnosisRouter from './routes/diagnosis.routes.js';
 import connectToDatabase from './database/mongodb.js';
-
+import bodyParser from 'body-parser';
 const app = express();
+app.use(bodyParser.json());
 
-//حسبي الله ونعم الوكيل تااااااني
-//swagger configuration
 
 const swaggerOptions = {
     definition: {

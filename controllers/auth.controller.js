@@ -154,15 +154,30 @@ export const login = async (req, res, next) => {
 
   try {
     console.log('Raw request body:', req.body);
-    
+    console.log('HTTP headers:', req.headers);
+    console.log('Environment:', process.env.NODE_ENV);
     const { email, password } = req.body;
-    const trimmedPassword = password.trim(); // Remove leading/trailing whitespace
-    console.log('Email:', email);
-    console.log('Received password:', trimmedPassword);
-    console.log('Password length:', trimmedPassword.length);
-    console.log('Password bytes:', Buffer.from(trimmedPassword).toString('hex'));
 
-    const user = await User.findOne({ email }).select('+password');
+    // Trim and decode email
+    const trimmedEmail = email ? email.trim() : '';
+    const decodedEmail = decodeURIComponent(trimmedEmail);
+    console.log('Raw email:', email);
+    console.log('Trimmed email:', trimmedEmail);
+    console.log('Decoded email:', decodedEmail);
+    console.log('Email length:', trimmedEmail.length);
+    console.log('Email char codes:', trimmedEmail.split('').map(c => c.charCodeAt(0)));
+
+    // Validate email with regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isEmailValid = emailRegex.test(trimmedEmail);
+    console.log('Email valid per regex:', isEmailValid);
+    if (!isEmailValid) {
+      console.log('Regex failed for trimmed email:', trimmedEmail);
+      console.log('Regex test for decoded email:', emailRegex.test(decodedEmail));
+      return res.status(400).json({ error: t("Please enter a valid email", "يرجى إدخال بريد إلكتروني صالح") });
+    }
+
+    const user = await User.findOne({ email: trimmedEmail }).select('+password');
     if (!user) {
       return res.status(401).json({ error: t("User Not Found", "المستخدم غير موجود") });
     }
@@ -170,7 +185,7 @@ export const login = async (req, res, next) => {
     // Check if stored password looks like a valid bcrypt hash
     console.log('Stored hash:', user.password);
     if (!user.password || !user.password.startsWith('$2b$')) {
-      console.log('Invalid hash format for user:', email);
+      console.log('Invalid hash format for user:', trimmedEmail);
       return res.status(500).json({ error: t("Invalid password hash in database", "تجزئة كلمة المرور غير صالحة في قاعدة البيانات") });
     }
 
@@ -188,12 +203,11 @@ export const login = async (req, res, next) => {
       });
     }
 
+    const trimmedPassword = password.trim();
+    console.log('Received password:', trimmedPassword);
     const isPasswordValid = await bcrypt.compare(trimmedPassword, user.password);
     console.log('Password valid:', isPasswordValid);
     if (!isPasswordValid) {
-      // Manual check to debug
-      const manualCheck = await bcrypt.compare(trimmedPassword, user.password);
-      console.log('Manual password check:', manualCheck);
       return res.status(401).json({ error: t("Invalid password", "كلمة المرور غير صحيحة") });
     }
 
