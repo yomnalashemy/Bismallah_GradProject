@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import {signUp, logIn, signUpWithGoogle, signUpWithFacebook, completeProfile, loginWithFacebook, loginWithGoogle, logOut} from '../controllers/auth.controller.js';
+import {signUp, login, signUpWithGoogle, signUpWithFacebook, completeProfile, loginWithFacebook, loginWithGoogle, logOut} from '../controllers/auth.controller.js';
 import {changePassword, forgotPassword, resetPassword, deleteAccount} from '../controllers/user.controller.js';
 import protect from '../middlewares/auth.middleware.js';
 import {verifyEmail} from '../controllers/verifyEmail.controller.js';
@@ -116,7 +116,7 @@ authRouter.post('/signup', signUp);
  *              - Invalid Password
  */
 
-authRouter.post('/login', logIn);
+authRouter.post('/login', login);
 
 authRouter.post('/logout', protect, logOut);
 
