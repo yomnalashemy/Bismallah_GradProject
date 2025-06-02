@@ -154,11 +154,13 @@ export const login = async (req, res, next) => {
 
   try {
     console.log('Raw request body:', req.body);
-    console.log('bcrypt version:', require('bcrypt/package.json').version);
+    
     const { email, password } = req.body;
     const trimmedPassword = password.trim(); // Remove leading/trailing whitespace
     console.log('Email:', email);
     console.log('Received password:', trimmedPassword);
+    console.log('Password length:', trimmedPassword.length);
+    console.log('Password bytes:', Buffer.from(trimmedPassword).toString('hex'));
 
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
@@ -189,6 +191,9 @@ export const login = async (req, res, next) => {
     const isPasswordValid = await bcrypt.compare(trimmedPassword, user.password);
     console.log('Password valid:', isPasswordValid);
     if (!isPasswordValid) {
+      // Manual check to debug
+      const manualCheck = await bcrypt.compare(trimmedPassword, user.password);
+      console.log('Manual password check:', manualCheck);
       return res.status(401).json({ error: t("Invalid password", "كلمة المرور غير صحيحة") });
     }
 
