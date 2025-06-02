@@ -148,13 +148,15 @@ export const signUpWithFacebook = async (req, res, next) => {
   }
 };
 
-export const logIn = async (req, res, next) => {
+export const login = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   const t = (en, ar) => lang === 'ar' ? ar : en;
 
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    console.log('Email:', email);
+    console.log('Received password:', password);
+    const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
       return res.status(401).json({ error: t("User Not Found", "المستخدم غير موجود") });
@@ -174,7 +176,9 @@ export const logIn = async (req, res, next) => {
       });
     }
 
+    console.log('Stored hash:', user.password);
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log('Password valid:', isPasswordValid);
     if (!isPasswordValid) {
       return res.status(401).json({ error: t("Invalid password", "كلمة المرور غير صحيحة") });
     }
