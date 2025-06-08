@@ -12,7 +12,7 @@ import { t, translateProfileFields } from '../utils/translationHelper.js';
 export const signUp = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   const t = (en, ar) => lang === 'ar' ? ar : en;
-
+  
   try {
     const {
       username,
@@ -26,6 +26,8 @@ export const signUp = async (req, res, next) => {
       ethnicity
     } = req.body;
 
+    
+
     if (!username || username.length < 5)
       return res.status(400).json({ error: t("Username must be at least 5 characters", "اسم المستخدم يجب أن يكون 5 أحرف على الأقل") });
 
@@ -33,57 +35,57 @@ export const signUp = async (req, res, next) => {
     if (!usernameRegex.test(username))
       return res.status(400).json({ error: t("Username contains invalid characters", "اسم المستخدم يحتوي على رموز غير مسموح بها") });
 
-    const normalizedEmail = email.trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(normalizedEmail))
+    if (!emailRegex.test(email))
       return res.status(400).json({ error: t("Invalid email", "البريد الإلكتروني غير صالح") });
 
     if (password !== confirmPassword)
       return res.status(400).json({ error: t("Passwords must match", "كلمتا المرور يجب أن تتطابق") });
 
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+    const passwordRegex = /^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[\W_]).{8,}$/;
     if (!passwordRegex.test(password))
       return res.status(400).json({ error: t("Password must include uppercase, lowercase, number, and symbol", "يجب أن تحتوي كلمة المرور على حرف كبير وصغير ورقم ورمز") });
 
-    const existingEmail = await User.findOne({ email: normalizedEmail });
-    if (existingEmail)
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
       return res.status(409).json({ error: t("Email already in use", "اسم المستخدم أو البريد الإلكتروني مستخدم بالفعل") });
-
-    const existingPhone = await User.findOne({ phoneNumber });
-    if (existingPhone)
+    }
+    const existingPhone = await User.findOne({ phoneNumber});
+    if (existingPhone) {
       return res.status(409).json({ error: t("Phone Number already in use", "رقم الهاتف مستخدم بالفعل") });
-
+    }
     const existingUsername = await User.findOne({ username });
-    if (existingUsername)
+    if (existingUsername) {
       return res.status(409).json({ error: t("Username already in use", "اسم المستخدم مستخدم بالفعل") });
+    }
 
+    // Translate values to English if in Arabic
     const genderEn = translateProfileFields.toEnglish(gender, 'gender');
     const countryEn = translateProfileFields.toEnglish(country, 'country');
     const ethnicityEn = translateProfileFields.toEnglish(ethnicity, 'ethnicity');
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const token = jwt.sign({
-      username,
-      email: normalizedEmail,
-      password: hashedPassword,
-      phoneNumber,
-      gender: genderEn,
-      country: countryEn,
-      DateOfBirth,
-      ethnicity: ethnicityEn
-    }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(
+      {
+        username,
+        email,
+        password: hashedPassword,
+        phoneNumber,
+        gender: genderEn,
+        country: countryEn,
+        DateOfBirth,
+        ethnicity: ethnicityEn
+      },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
 
-    // Respond to the user immediately
+    await sendEmailVerificationLink(email, username, token);
+
     res.status(200).json({
       success: true,
-      message: t("Verification email sent", "تم إرسال بريد التحقق"),
-      pendingVerification: true
+      message: t("Verification email sent", "تم إرسال بريد التحقق")
     });
-
-    // Send the email asynchronously
-    sendEmailVerificationLink(normalizedEmail, username, token)
-      .catch(err => console.error("Error sending verification email:", err));
-
   } catch (error) {
     next(error);
   }
