@@ -9,11 +9,10 @@ import { parsePhoneNumberFromString } from 'libphonenumber-js'; // FOR VALID PHO
 import {JWT_SECRET, JWT_EXPIRES_IN} from '../config/env.js';
 import { t, translateProfileFields } from '../utils/translationHelper.js';
 
-
 export const signUp = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   const t = (en, ar) => lang === 'ar' ? ar : en;
-  
+
   try {
     const {
       username,
@@ -27,8 +26,6 @@ export const signUp = async (req, res, next) => {
       ethnicity
     } = req.body;
 
-    
-
     if (!username || username.length < 5)
       return res.status(400).json({ error: t("Username must be at least 5 characters", "اسم المستخدم يجب أن يكون 5 أحرف على الأقل") });
 
@@ -36,8 +33,9 @@ export const signUp = async (req, res, next) => {
     if (!usernameRegex.test(username))
       return res.status(400).json({ error: t("Username contains invalid characters", "اسم المستخدم يحتوي على رموز غير مسموح بها") });
 
+    const normalizedEmail = email.trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email))
+    if (!emailRegex.test(normalizedEmail))
       return res.status(400).json({ error: t("Invalid email", "البريد الإلكتروني غير صالح") });
 
     if (password !== confirmPassword)
@@ -47,45 +45,40 @@ export const signUp = async (req, res, next) => {
     if (!passwordRegex.test(password))
       return res.status(400).json({ error: t("Password must include uppercase, lowercase, number, and symbol", "يجب أن تحتوي كلمة المرور على حرف كبير وصغير ورقم ورمز") });
 
-    const existingEmail = await User.findOne({ email });
-    if (existingEmail) {
+    const existingEmail = await User.findOne({ email: normalizedEmail });
+    if (existingEmail)
       return res.status(409).json({ error: t("Email already in use", "اسم المستخدم أو البريد الإلكتروني مستخدم بالفعل") });
-    }
-    const existingPhone = await User.findOne({ phoneNumber});
-    if (existingPhone) {
-      return res.status(409).json({ error: t("Phone Number already in use", "رقم الهاتف مستخدم بالفعل") });
-    }
-    const existingUsername = await User.findOne({ username });
-    if (existingUsername) {
-      return res.status(409).json({ error: t("Username already in use", "اسم المستخدم مستخدم بالفعل") });
-    }
 
-    // Translate values to English if in Arabic
+    const existingPhone = await User.findOne({ phoneNumber });
+    if (existingPhone)
+      return res.status(409).json({ error: t("Phone Number already in use", "رقم الهاتف مستخدم بالفعل") });
+
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername)
+      return res.status(409).json({ error: t("Username already in use", "اسم المستخدم مستخدم بالفعل") });
+
     const genderEn = translateProfileFields.toEnglish(gender, 'gender');
     const countryEn = translateProfileFields.toEnglish(country, 'country');
     const ethnicityEn = translateProfileFields.toEnglish(ethnicity, 'ethnicity');
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const token = jwt.sign(
-      {
-        username,
-        email,
-        password: hashedPassword,
-        phoneNumber,
-        gender: genderEn,
-        country: countryEn,
-        DateOfBirth,
-        ethnicity: ethnicityEn
-      },
-      JWT_SECRET,
-      { expiresIn: '1h' }
-    );
+    const token = jwt.sign({
+      username,
+      email: normalizedEmail,
+      password: hashedPassword,
+      phoneNumber,
+      gender: genderEn,
+      country: countryEn,
+      DateOfBirth,
+      ethnicity: ethnicityEn
+    }, JWT_SECRET, { expiresIn: '1h' });
 
-    await sendEmailVerificationLink(email, username, token);
+    await sendEmailVerificationLink(normalizedEmail, username, token);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: t("Verification email sent", "تم إرسال بريد التحقق")
+      message: t("Verification email sent", "تم إرسال بريد التحقق"),
+      pendingVerification: true
     });
   } catch (error) {
     next(error);
@@ -153,67 +146,46 @@ export const login = async (req, res, next) => {
   const t = (en, ar) => lang === 'ar' ? ar : en;
 
   try {
-    console.log('Raw request body:', req.body);
-    console.log('HTTP headers:', req.headers);
-    console.log('Environment:', process.env.NODE_ENV);
     const { email, password } = req.body;
+    const normalizedEmail = email.trim().toLowerCase();
 
-    // Trim and decode email
-    const trimmedEmail = email ? email.trim() : '';
-    const decodedEmail = decodeURIComponent(trimmedEmail);
-    console.log('Raw email:', email);
-    console.log('Trimmed email:', trimmedEmail);
-    console.log('Decoded email:', decodedEmail);
-    console.log('Email length:', trimmedEmail.length);
-    console.log('Email char codes:', trimmedEmail.split('').map(c => c.charCodeAt(0)));
-
-    // Validate email with regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const isEmailValid = emailRegex.test(trimmedEmail);
-    console.log('Email valid per regex:', isEmailValid);
-    if (!isEmailValid) {
-      console.log('Regex failed for trimmed email:', trimmedEmail);
-      console.log('Regex test for decoded email:', emailRegex.test(decodedEmail));
+    if (!emailRegex.test(normalizedEmail)) {
       return res.status(400).json({ error: t("Please enter a valid email", "يرجى إدخال بريد إلكتروني صالح") });
     }
 
-    const user = await User.findOne({ email: trimmedEmail }).select('+password');
+    const user = await User.findOne({ email: normalizedEmail }).select('+password');
     if (!user) {
       return res.status(401).json({ error: t("User Not Found", "المستخدم غير موجود") });
     }
 
-    // Check if stored password looks like a valid bcrypt hash
-    console.log('Stored hash:', user.password);
     if (!user.password || !user.password.startsWith('$2b$')) {
-      console.log('Invalid hash format for user:', trimmedEmail);
       return res.status(500).json({ error: t("Invalid password hash in database", "تجزئة كلمة المرور غير صالحة في قاعدة البيانات") });
     }
 
-    // Reject if social auth
     if (user.authProvider !== "local") {
       return res.status(400).json({
         error: t(`Please log in with ${user.authProvider}.`, `يرجى تسجيل الدخول باستخدام ${user.authProvider}`)
       });
     }
 
-    // Require email verification
     if (!user.isVerified) {
       return res.status(403).json({
         error: t("Please verify your email before logging in", "يرجى التحقق من بريدك الإلكتروني قبل تسجيل الدخول")
       });
     }
 
-    const trimmedPassword = password.trim();
-    console.log('Received password:', trimmedPassword);
-    const isPasswordValid = await bcrypt.compare(trimmedPassword, user.password);
-    console.log('Password valid:', isPasswordValid);
+    const isPasswordValid = await bcrypt.compare(password.trim(), user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ error: t("Invalid password", "كلمة المرور غير صحيحة") });
     }
 
+    // Optional: Introduce delay to slow brute force
+    // await new Promise(r => setTimeout(r, 300));
+
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: t("User logged in successfully", "تم تسجيل الدخول بنجاح"),
       data: { token, user }
