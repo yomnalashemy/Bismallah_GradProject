@@ -66,12 +66,12 @@ export const signUp = async (req, res, next) => {
     }
 
     // Phone number: must be 11 digits and valid
-    const phoneRegex = /^\d{10}$/;
+    const phoneRegex = /^\+\d{10,15}$/;
 if (!phoneRegex.test(phoneNumber)) {
   return res.status(400).json({
     error: t(
-      "Phone number must be 10 digits and must be real",
-      "رقم الهاتف يجب أن يتكون من 10 أرقام ويجب أن يكون حقيقيًا"
+      "Phone number must include the country code and be valid (e.g. +201234567890)",
+      "رقم الهاتف يجب أن يتضمن رمز الدولة ويكون صحيحًا (مثال: +201234567890)"
     )
   });
 }
