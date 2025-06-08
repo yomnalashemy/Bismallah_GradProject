@@ -26,26 +26,18 @@ export const signUp = async (req, res, next) => {
       ethnicity
     } = req.body;
 
-    // Username validations
     if (!username || username.length < 5) {
-      return res.status(409).json({ error: t("Username must be at least 5 characters", "اسم المستخدم يجب أن يكون 5 أحرف على الأقل") });
-    }
+  return res.status(400).json({
+    error: t("Username must be at least 5 characters", "اسم المستخدم يجب أن يكون 5 أحرف على الأقل")
+  });
+}
 
-    const usernameRegex = /^[a-zA-Z0-9._]+$/;
-    if (!usernameRegex.test(username)) {
-      return res.status(409).json({ error: t("Username contains invalid characters", "اسم المستخدم يحتوي على رموز غير مسموح بها") });
-    }
-
-    const hasNumber = /\d/.test(username);
-    const hasDotOrUnderscore = /[._]/.test(username);
-    if (!hasNumber || !hasDotOrUnderscore) {
-      return res.status(409).json({
-        error: t(
-          "Username must include at least one number and either a dot or underscore",
-          "يجب أن يحتوي اسم المستخدم على رقم واحد على الأقل ونقطة أو شرطة سفلية"
-        )
-      });
-    }
+// Reject if username contains spaces
+if (/\s/.test(username)) {
+  return res.status(400).json({
+    error: t("Username cannot contain spaces", "اسم المستخدم لا يمكن أن يحتوي على مسافات")
+  });
+}
 
     // Email: must be valid and only Gmail
     const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
