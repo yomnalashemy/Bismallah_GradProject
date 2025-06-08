@@ -26,7 +26,7 @@ export const verifyEmail = async (req, res) => {
       user.email = decoded.email;
       await user.save();
 
-      return res.send(`
+    return res.send(`
         <!DOCTYPE html>
         <html lang="${lang}">
           <head>
