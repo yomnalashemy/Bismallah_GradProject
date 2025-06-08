@@ -73,13 +73,17 @@ export const signUp = async (req, res, next) => {
       ethnicity: ethnicityEn
     }, JWT_SECRET, { expiresIn: '1h' });
 
-    await sendEmailVerificationLink(normalizedEmail, username, token);
-
-    return res.status(200).json({
+    // Respond to the user immediately
+    res.status(200).json({
       success: true,
       message: t("Verification email sent", "تم إرسال بريد التحقق"),
       pendingVerification: true
     });
+
+    // Send the email asynchronously
+    sendEmailVerificationLink(normalizedEmail, username, token)
+      .catch(err => console.error("Error sending verification email:", err));
+
   } catch (error) {
     next(error);
   }

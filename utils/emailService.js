@@ -1,24 +1,17 @@
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: { rejectUnauthorized: false }
-});
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 export const sendEmailVerificationLink = async (email, username, token) => {
   const webVerifyUrl = `https://lupira.onrender.com/api/auth/verify-email?token=${encodeURIComponent(token)}`;
   const appDeeplinkFallback = `https://lupira.onrender.com/api/auth/deeplink?to=verify-email&token=${encodeURIComponent(token)}`;
 
-  const mailOptions = {
-    from: `Lupira <${process.env.EMAIL_USER}>`,
+  const msg = {
     to: email,
+    from: process.env.EMAIL_USER, // Must be a verified sender in SendGrid
     subject: "Verify Your Email - Lupira",
     html: `
       <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -48,52 +41,47 @@ export const sendEmailVerificationLink = async (email, username, token) => {
     `
   };
 
-  await transporter.sendMail(mailOptions);
+  await sgMail.send(msg);
   console.log("Verification email sent to:", email);
 };
 
 export const sendResetPasswordEmail = async (email, username, resetToken) => {
-    const resetLink = `https://lupira.onrender.com/api/auth/deeplink?to=reset-password&token=${resetToken}`;
+  const resetLink = `https://lupira.onrender.com/api/auth/deeplink?to=reset-password&token=${resetToken}`;
 
-    const mailOptions = {
-        from: `Lupira <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: "Reset Your Password",
-        html: `
-             <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; line-height: 1.6;">
+  const msg = {
+    to: email,
+    from: process.env.EMAIL_USER,
+    subject: "Reset Your Password",
+    html: `
+      <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; line-height: 1.6;">
         <div style="background-color: #6A5ACD; color: #ffffff; padding: 15px; text-align: center; border-radius: 8px 8px 0 0;">
-            <h1>Password Reset Request</h1>
+          <h1>Password Reset Request</h1>
         </div>
         <div style="border: 1px solid #ddd; padding: 20px;">
-            <p style="color: #555;">Hello <strong>${username}</strong>,</p>
-            <p style="color: #555;">We received a request to reset your password. Click the button below to reset it:</p>
-            
-            <a href="${resetLink}" style="display:inline-block; margin-top:15px; padding:10px 15px; background-color: #6A5ACD; color:#ffffff; text-decoration:none; border-radius:5px;">Reset Password</a>
-
-            <p style="color: #555;">If you didn't request this, please ignore this email.</p>
-
-            <p style="margin-top: 20px; color: #555;">Warm Regards,<br><strong>The Lupira Team</strong></p>
+          <p style="color: #555;">Hello <strong>${username}</strong>,</p>
+          <p style="color: #555;">We received a request to reset your password. Click the button below to reset it:</p>
+          <a href="${resetLink}" style="display:inline-block; margin-top:15px; padding:10px 15px; background-color: #6A5ACD; color:#ffffff; text-decoration:none; border-radius:5px;">Reset Password</a>
+          <p style="color: #555;">If you didn't request this, please ignore this email.</p>
+          <p style="margin-top: 20px; color: #555;">Warm Regards,<br><strong>The Lupira Team</strong></p>
         </div>
-
         <footer style="background-color: #f5f5f5; padding: 10px; text-align: center; color: #888; font-size: 12px;">
-            © ${new Date().getFullYear()} Lupira. All rights reserved.
+          © ${new Date().getFullYear()} Lupira. All rights reserved.
         </footer>
-    </div>
-        `
-    };
+      </div>
+    `
+  };
 
-    await transporter.sendMail(mailOptions);
+  await sgMail.send(msg);
+  console.log("Reset password email sent to:", email);
 };
 
 export const sendEmailChangeVerificationLink = async (email, username, token, lang = 'en') => {
   const verifyUrl = `https://lupira.onrender.com/api/auth/verify-email?token=${encodeURIComponent(token)}&lang=${lang}`;
   const t = (en, ar) => (lang === 'ar' ? ar : en);
 
-  console.log('sendEmailChangeVerificationLink - Sending email to:', email, 'Language:', lang); // Debug log
-
-  const mailOptions = {
-    from: `Lupira <${process.env.EMAIL_USER}>`,
+  const msg = {
     to: email,
+    from: process.env.EMAIL_USER,
     subject: t('Confirm Your New Email - Lupira', 'تأكيد بريدك الإلكتروني الجديد - لوبيرا'),
     html: `
       <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; line-height: 1.6; direction: ${lang === 'ar' ? 'rtl' : 'ltr'};">
@@ -121,9 +109,9 @@ export const sendEmailChangeVerificationLink = async (email, username, token, la
           © ${new Date().getFullYear()} Lupira. ${t('All rights reserved.', 'جميع الحقوق محفوظة.')}
         </footer>
       </div>
-    `,
+    `
   };
 
-  await transporter.sendMail(mailOptions);
-  console.log('sendEmailChangeVerificationLink - Email sent to:', email);
+  await sgMail.send(msg);
+  console.log('Email change verification sent to:', email);
 };
