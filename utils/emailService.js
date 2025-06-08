@@ -6,9 +6,10 @@ dotenv.config();
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER,      // Your Gmail address
-    pass: process.env.EMAIL_PASS   // App-specific password or Gmail password
-  }
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+  tls: { rejectUnauthorized: false }
 });
 export const sendEmailVerificationLink = async (email, username, token) => {
   const webVerifyUrl = `https://lupira.onrender.com/api/auth/verify-email?token=${encodeURIComponent(token)}`;
