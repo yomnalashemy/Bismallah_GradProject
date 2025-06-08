@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
         maxLength: [50, "Username must be at most 50 characters long"], 
         validate: {
           validator: function (value) {
-            return /^(?=.*[\d_])[a-zA-Z0-9._]+$/.test(value);
+            return /\s/.test(value);
           },
           message: "Username can only contain letters, numbers, periods, and underscores",
         }
