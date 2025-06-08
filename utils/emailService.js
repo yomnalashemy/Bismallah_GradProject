@@ -16,7 +16,7 @@ export const sendEmailVerificationLink = async (email, username, token) => {
   const appDeeplinkFallback = `https://lupira.onrender.com/api/auth/deeplink?to=verify-email&token=${encodeURIComponent(token)}`;
 
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: `Lupira <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Verify Your Email - Lupira",
     html: `
@@ -54,7 +54,7 @@ export const sendResetPasswordEmail = async (email, username, resetToken) => {
   const resetLink = `https://lupira.onrender.com/api/auth/deeplink?to=reset-password&token=${resetToken}`;
 
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: `Lupira <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Reset Your Password",
     html: `
@@ -84,7 +84,7 @@ export const sendEmailChangeVerificationLink = async (email, username, token, la
   const t = (en, ar) => (lang === 'ar' ? ar : en);
 
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: `Lupira <${process.env.EMAIL_USER}>`,
     to: email,
     subject: t('Confirm Your New Email - Lupira', 'تأكيد بريدك الإلكتروني الجديد - لوبيرا'),
     html: `
