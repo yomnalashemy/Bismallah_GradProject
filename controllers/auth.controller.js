@@ -67,14 +67,14 @@ export const signUp = async (req, res, next) => {
 
     // Phone number: must be 11 digits and valid
     const phoneRegex = /^\d{10}$/;
-    if (!phoneRegex.test(phoneNumber)) {
-      return res.status(400).json({
-        error: t(
-          "Phone number must be 10 digits and must be real",
-          "رقم الهاتف يجب أن يتكون من 11 رقمًا ويجب أن يكون حقيقيًا"
-        )
-      });
-    }
+if (!phoneRegex.test(phoneNumber)) {
+  return res.status(400).json({
+    error: t(
+      "Phone number must be 10 digits and must be real",
+      "رقم الهاتف يجب أن يتكون من 10 أرقام ويجب أن يكون حقيقيًا"
+    )
+  });
+}
 
     // Uniqueness checks
     const existingEmail = await User.findOne({ email });
