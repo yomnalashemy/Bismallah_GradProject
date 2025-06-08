@@ -70,7 +70,7 @@ export const signUp = async (req, res, next) => {
     if (!phoneRegex.test(phoneNumber)) {
       return res.status(400).json({
         error: t(
-          "Phone number must be 11 digits and must be real",
+          "Phone number must be 10 digits and must be real",
           "رقم الهاتف يجب أن يتكون من 11 رقمًا ويجب أن يكون حقيقيًا"
         )
       });
