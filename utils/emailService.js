@@ -1,17 +1,22 @@
-import sgMail from '@sendgrid/mail';
+import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 dotenv.config();
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,      // Your Gmail address
+    pass: process.env.EMAIL_PASSWORD   // App-specific password or Gmail password
+  }
+});
 export const sendEmailVerificationLink = async (email, username, token) => {
   const webVerifyUrl = `https://lupira.onrender.com/api/auth/verify-email?token=${encodeURIComponent(token)}`;
   const appDeeplinkFallback = `https://lupira.onrender.com/api/auth/deeplink?to=verify-email&token=${encodeURIComponent(token)}`;
 
-  const msg = {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
     to: email,
-    from: process.env.EMAIL_USER, // Must be a verified sender in SendGrid
     subject: "Verify Your Email - Lupira",
     html: `
       <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -41,16 +46,15 @@ export const sendEmailVerificationLink = async (email, username, token) => {
     `
   };
 
-  await sgMail.send(msg);
+  await transporter.sendMail(mailOptions);
   console.log("Verification email sent to:", email);
 };
-
 export const sendResetPasswordEmail = async (email, username, resetToken) => {
   const resetLink = `https://lupira.onrender.com/api/auth/deeplink?to=reset-password&token=${resetToken}`;
 
-  const msg = {
-    to: email,
+  const mailOptions = {
     from: process.env.EMAIL_USER,
+    to: email,
     subject: "Reset Your Password",
     html: `
       <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; line-height: 1.6;">
@@ -71,17 +75,16 @@ export const sendResetPasswordEmail = async (email, username, resetToken) => {
     `
   };
 
-  await sgMail.send(msg);
+  await transporter.sendMail(mailOptions);
   console.log("Reset password email sent to:", email);
 };
-
 export const sendEmailChangeVerificationLink = async (email, username, token, lang = 'en') => {
   const verifyUrl = `https://lupira.onrender.com/api/auth/verify-email?token=${encodeURIComponent(token)}&lang=${lang}`;
   const t = (en, ar) => (lang === 'ar' ? ar : en);
 
-  const msg = {
-    to: email,
+  const mailOptions = {
     from: process.env.EMAIL_USER,
+    to: email,
     subject: t('Confirm Your New Email - Lupira', 'تأكيد بريدك الإلكتروني الجديد - لوبيرا'),
     html: `
       <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; line-height: 1.6; direction: ${lang === 'ar' ? 'rtl' : 'ltr'};">
@@ -112,6 +115,6 @@ export const sendEmailChangeVerificationLink = async (email, username, token, la
     `
   };
 
-  await sgMail.send(msg);
+  await transporter.sendMail(mailOptions);
   console.log('Email change verification sent to:', email);
 };
