@@ -26,74 +26,43 @@ export const signUp = async (req, res, next) => {
       ethnicity
     } = req.body;
 
-    if (!username || username.length < 5) {
-  return res.status(400).json({
-    error: t("Username must be at least 5 characters", "اسم المستخدم يجب أن يكون 5 أحرف على الأقل")
-  });
-}
+    if (!username || username.length < 5)
+      return res.status(400).json({ error: t("Username must be at least 5 characters, ", "اسم المستخدم يجب أن يكون 5 أحرف على الأقل") });
+    if (username.length > 50)
+      return res.status(400).json({ error: t("Username must be at most 50 characters", "اسم المستخدم يجب أن لا يزيد عن 50 حرفًا") });
 
-// Reject if username contains spaces
-if (/\s/.test(username)) {
-  return res.status(400).json({
-    error: t("Username cannot contain spaces", "اسم المستخدم لا يمكن أن يحتوي على مسافات")
-  });
-}
+    const normalizedEmail = email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normalizedEmail))
+      return res.status(400).json({ error: t("Invalid email", "البريد الإلكتروني غير صالح") });
 
-    // Email: must be valid and only Gmail
-    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-    if (!gmailRegex.test(email)) {
-      return res.status(409).json({
-        error: t("Only Gmail addresses are allowed", "يُسمح فقط بعناوين Gmail")
-      });
-    }
-
-    // Password validations
-    if (password !== confirmPassword) {
-      return res.status(400).json({ error: t("Passwords must match", "كلمتا المرور يجب أن تتطابق") });
-    }
+    if (password !== confirmPassword)
+      return res.status(400).json({ error: t("Passwords don't match", "كلمتا المرور يجب أن تتطابق") });
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-    if (!passwordRegex.test(password)) {
+    if (!passwordRegex.test(password))
       return res.status(400).json({ error: t("Password must include uppercase, lowercase, number, and symbol", "يجب أن تحتوي كلمة المرور على حرف كبير وصغير ورقم ورمز") });
-    }
 
-    // Phone number: must be 11 digits and valid
-    const phoneRegex = /^\+\d{10,15}$/;
-if (!phoneRegex.test(phoneNumber)) {
-  return res.status(400).json({
-    error: t(
-      "Phone number must include the country code and be valid (e.g. +201234567890)",
-      "رقم الهاتف يجب أن يتضمن رمز الدولة ويكون صحيحًا (مثال: +201234567890)"
-    )
-  });
-}
-
-    // Uniqueness checks
-    const existingEmail = await User.findOne({ email });
-    if (existingEmail) {
-      return res.status(409).json({ error: t("Email already in use", "البريد الإلكتروني مستخدم بالفعل") });
-    }
+    const existingEmail = await User.findOne({ email: normalizedEmail });
+    if (existingEmail)
+      return res.status(409).json({ error: t("Email already in use", "اسم المستخدم أو البريد الإلكتروني مستخدم بالفعل") });
 
     const existingPhone = await User.findOne({ phoneNumber });
-    if (existingPhone) {
+    if (existingPhone)
       return res.status(409).json({ error: t("Phone Number already in use", "رقم الهاتف مستخدم بالفعل") });
-    }
 
     const existingUsername = await User.findOne({ username });
-    if (existingUsername) {
+    if (existingUsername)
       return res.status(409).json({ error: t("Username already in use", "اسم المستخدم مستخدم بالفعل") });
-    }
 
-    // Translate Arabic fields to English
     const genderEn = translateProfileFields.toEnglish(gender, 'gender');
     const countryEn = translateProfileFields.toEnglish(country, 'country');
     const ethnicityEn = translateProfileFields.toEnglish(ethnicity, 'ethnicity');
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const token = jwt.sign({
       username,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       phoneNumber,
       gender: genderEn,
@@ -102,17 +71,21 @@ if (!phoneRegex.test(phoneNumber)) {
       ethnicity: ethnicityEn
     }, JWT_SECRET, { expiresIn: '1h' });
 
-    await sendEmailVerificationLink(email, username, token);
-
+    // Respond to the user immediately
     res.status(200).json({
       success: true,
-      message: t("Verification email sent", "تم إرسال بريد التحقق")
+      message: t("Verification email sent", "تم إرسال بريد التحقق"),
+      pendingVerification: true
     });
+
+    // Send the email asynchronously
+    sendEmailVerificationLink(normalizedEmail, username, token)
+      .catch(err => console.error("Error sending verification email:", err));
+
   } catch (error) {
     next(error);
   }
 };
-
 
 export const signUpWithGoogle = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';

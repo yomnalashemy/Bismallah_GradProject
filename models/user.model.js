@@ -12,13 +12,7 @@ const userSchema = new mongoose.Schema({
         unique: [true, "Username is already taken"],
         required: [true, "Username is required"],
         minLength: [5, "Username must be at least 5 characters long"],
-        maxLength: [50, "Username must be at most 50 characters long"], 
-        validate: {
-          validator: function (value) {
-            return /\s/.test(value);
-          },
-          message: "Username can only contain letters, numbers, periods, and underscores",
-        }
+        maxLength: [50, "Username must be at most 50 characters long"]
     },
 
     email: {

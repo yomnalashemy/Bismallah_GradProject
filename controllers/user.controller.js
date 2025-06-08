@@ -141,9 +141,8 @@ export const editProfile = async (req, res, next) => {
       if (username.length < 5) {
         return res.status(400).json({ error: t('Username must be at least 5 characters', 'اسم المستخدم يجب أن لا يقل عن 5 حروف') });
       }
-      const usernameRegex = /^[a-zA-Z0-9._]+$/;
-      if (!usernameRegex.test(username)) {
-        return res.status(400).json({ error: t('Invalid username format', 'تنسيق اسم المستخدم غير صالح') });
+      if (username.length > 50) {
+        return res.status(400).json({ error: t('Username must be at most 50 characters', 'اسم المستخدم يجب أن لا يزيد عن 50 حرفًا') });
       }
       const existing = await User.findOne({ username });
       if (existing) {
