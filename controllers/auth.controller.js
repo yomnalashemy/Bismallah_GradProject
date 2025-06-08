@@ -12,7 +12,7 @@ import { t, translateProfileFields } from '../utils/translationHelper.js';
 export const signUp = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   const t = (en, ar) => lang === 'ar' ? ar : en;
-  
+
   try {
     const {
       username,
@@ -26,59 +26,89 @@ export const signUp = async (req, res, next) => {
       ethnicity
     } = req.body;
 
-    
-
-    if (!username || username.length < 5)
+    // Username validations
+    if (!username || username.length < 5) {
       return res.status(400).json({ error: t("Username must be at least 5 characters", "اسم المستخدم يجب أن يكون 5 أحرف على الأقل") });
+    }
 
     const usernameRegex = /^[a-zA-Z0-9._]+$/;
-    if (!usernameRegex.test(username))
+    if (!usernameRegex.test(username)) {
       return res.status(400).json({ error: t("Username contains invalid characters", "اسم المستخدم يحتوي على رموز غير مسموح بها") });
+    }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email))
-      return res.status(400).json({ error: t("Invalid email", "البريد الإلكتروني غير صالح") });
+    const hasNumber = /\d/.test(username);
+    const hasDotOrUnderscore = /[._]/.test(username);
+    if (!hasNumber || !hasDotOrUnderscore) {
+      return res.status(400).json({
+        error: t(
+          "Username must include at least one number and either a dot or underscore",
+          "يجب أن يحتوي اسم المستخدم على رقم واحد على الأقل ونقطة أو شرطة سفلية"
+        )
+      });
+    }
 
-    if (password !== confirmPassword)
+    // Email: must be valid and only Gmail
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    if (!gmailRegex.test(email)) {
+      return res.status(400).json({
+        error: t("Only Gmail addresses are allowed", "يُسمح فقط بعناوين Gmail")
+      });
+    }
+
+    // Password validations
+    if (password !== confirmPassword) {
       return res.status(400).json({ error: t("Passwords must match", "كلمتا المرور يجب أن تتطابق") });
+    }
 
-    const passwordRegex = /^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[\W_]).{8,}$/;
-    if (!passwordRegex.test(password))
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+    if (!passwordRegex.test(password)) {
       return res.status(400).json({ error: t("Password must include uppercase, lowercase, number, and symbol", "يجب أن تحتوي كلمة المرور على حرف كبير وصغير ورقم ورمز") });
+    }
 
+    // Phone number: must be 11 digits and valid
+    const phoneRegex = /^\d{11}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      return res.status(400).json({
+        error: t(
+          "Phone number must be 11 digits and must be real",
+          "رقم الهاتف يجب أن يتكون من 11 رقمًا ويجب أن يكون حقيقيًا"
+        )
+      });
+    }
+
+    // Uniqueness checks
     const existingEmail = await User.findOne({ email });
     if (existingEmail) {
-      return res.status(409).json({ error: t("Email already in use", "اسم المستخدم أو البريد الإلكتروني مستخدم بالفعل") });
+      return res.status(409).json({ error: t("Email already in use", "البريد الإلكتروني مستخدم بالفعل") });
     }
-    const existingPhone = await User.findOne({ phoneNumber});
+
+    const existingPhone = await User.findOne({ phoneNumber });
     if (existingPhone) {
       return res.status(409).json({ error: t("Phone Number already in use", "رقم الهاتف مستخدم بالفعل") });
     }
+
     const existingUsername = await User.findOne({ username });
     if (existingUsername) {
       return res.status(409).json({ error: t("Username already in use", "اسم المستخدم مستخدم بالفعل") });
     }
 
-    // Translate values to English if in Arabic
+    // Translate Arabic fields to English
     const genderEn = translateProfileFields.toEnglish(gender, 'gender');
     const countryEn = translateProfileFields.toEnglish(country, 'country');
     const ethnicityEn = translateProfileFields.toEnglish(ethnicity, 'ethnicity');
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const token = jwt.sign(
-      {
-        username,
-        email,
-        password: hashedPassword,
-        phoneNumber,
-        gender: genderEn,
-        country: countryEn,
-        DateOfBirth,
-        ethnicity: ethnicityEn
-      },
-      JWT_SECRET,
-      { expiresIn: '1h' }
-    );
+
+    const token = jwt.sign({
+      username,
+      email,
+      password: hashedPassword,
+      phoneNumber,
+      gender: genderEn,
+      country: countryEn,
+      DateOfBirth,
+      ethnicity: ethnicityEn
+    }, JWT_SECRET, { expiresIn: '1h' });
 
     await sendEmailVerificationLink(email, username, token);
 
@@ -90,6 +120,7 @@ export const signUp = async (req, res, next) => {
     next(error);
   }
 };
+
 
 export const signUpWithGoogle = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
