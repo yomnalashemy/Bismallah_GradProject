@@ -312,8 +312,10 @@ export const completeProfile = async (req, res, next) => {
       country,
       DateOfBirth,
       ethnicity,
-      loginSource: decoded.source,
-      password: null
+      authProvider: decoded.source || 'local',
+      password: null,
+      isVerified: true,
+      profileCompleted: true
     });
 
     const authToken = generateToken(newUser._id);
