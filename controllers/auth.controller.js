@@ -62,11 +62,6 @@ export const signUp = async (req, res, next) => {
       return res.status(400).json({ error: t("Password must include uppercase, lowercase, number, and symbol", "كلمة المرور يجب أن تحتوي على حرف كبير، صغير، رقم، ورمز") });
     console.log(`Validation took ${Date.now() - validateStart}ms`);
 
-    // Ensure MongoDB indexes on email, phoneNumber, username
-    // Run: db.users.createIndex({ email: 1 }, { unique: true });
-    //      db.users.createIndex({ phoneNumber: 1 }, { unique: true });
-    //      db.users.createIndex({ username: 1 }, { unique: true });
-
     // Database checks
     const dbStart = Date.now();
     const existingEmail = await User.findOne({ email: normalizedEmail });
@@ -98,6 +93,21 @@ export const signUp = async (req, res, next) => {
     }, JWT_SECRET, { expiresIn: '1h' });
     console.log(`JWT signing took ${Date.now() - tokenStart}ms`);
 
+    // Create user with all required fields
+    const newUser = await User.create({
+      username,
+      email: normalizedEmail,
+      password: hashedPassword,
+      phoneNumber: parsedPhone.number,
+      gender: genderEn,
+      country: countryEn,
+      DateOfBirth,
+      ethnicity: ethnicityEn,
+      authProvider: 'local',
+      isVerified: false,
+      profileCompleted: false
+    });
+
     // Respond to the user immediately
     res.status(200).json({
       success: true,
@@ -115,6 +125,7 @@ export const signUp = async (req, res, next) => {
     next(error);
   }
 };
+
 export const signUpWithGoogle = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   const t = (en, ar) => lang === 'ar' ? ar : en;
@@ -304,21 +315,24 @@ export const completeProfile = async (req, res, next) => {
       return res.status(400).json({ error: t("Invalid phone number", "رقم الهاتف غير صالح") });
     }
 
+    const genderEn = translateProfileFields.toEnglish(gender, 'gender');
+    const countryEn = translateProfileFields.toEnglish(country, 'country');
+    const ethnicityEn = translateProfileFields.toEnglish(ethnicity, 'ethnicity');
+
     const newUser = await User.create({
       email: decoded.email,
       username,
-      phoneNumber,
-      gender,
-      country,
+      phoneNumber: parsedPhone.number,
+      gender: genderEn,
+      country: countryEn,
       DateOfBirth,
-      ethnicity,
+      ethnicity: ethnicityEn,
       authProvider: decoded.source || 'local',
-      password: null,
       isVerified: true,
       profileCompleted: true
     });
 
-    const authToken = generateToken(newUser._id);
+    const authToken = jwt.sign({ userId: newUser._id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
     res.status(201).json({ success: true, token: authToken, user: newUser });
   } catch (error) {
     next(error);
