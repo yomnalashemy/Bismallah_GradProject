@@ -16,7 +16,7 @@ export const signUp = async (req, res, next) => {
 
   try {
     const {
-     username,
+      username,
       email,
       password,
       confirmPassword,
@@ -30,21 +30,36 @@ export const signUp = async (req, res, next) => {
     // Validation
     const validateStart = Date.now();
     if (!username || username.length < 5)
-      return res.status(400).json({ error: t("Username must be at least 5 characters, ", "اسم المستخدم يجب أن يكون 5 أحرف على الأقل") });
+      return res.status(400).json({ error: t("Username must be at least 5 characters", "اسم المستخدم يجب أن يكون 5 أحرف على الأقل") });
     if (username.length > 50)
       return res.status(400).json({ error: t("Username must be at most 50 characters", "اسم المستخدم يجب أن لا يزيد عن 50 حرفًا") });
 
     const normalizedEmail = email.trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(normalizedEmail))
-      return res.status(400).json({ error: t("Invalid email", "البريد الإلكتروني غير صالح") });
+      return res.status(400).json({ error: t("Invalid email format", "صيغة البريد الإلكتروني غير صالحة") });
+    if (!normalizedEmail.endsWith('@gmail.com'))
+      return res.status(400).json({ error: t("Email must be a Gmail address", "البريد الإلكتروني يجب أن يكون من Gmail") });
+
+    if (!phoneNumber)
+      return res.status(400).json({ error: t("Phone number is required", "رقم الهاتف مطلوب") });
+    const parsedPhone = parsePhoneNumberFromString(phoneNumber);
+    if (!parsedPhone || !parsedPhone.isValid())
+      return res.status(400).json({ error: t("Invalid phone number", "رقم الهاتف غير صالح") });
+    const nationalNumber = parsedPhone.nationalNumber;
+    const countryCode = parsedPhone.country;
+    // Validate digit length based on country (example ranges, adjust as needed)
+    const minDigits = countryCode === 'US' ? 10 : 7; // US: 10 digits, others: at least 7
+    const maxDigits = countryCode === 'US' ? 10 : 15; // US: 10 digits, others: up to 15
+    if (nationalNumber.length < minDigits || nationalNumber.length > maxDigits)
+      return res.status(400).json({ error: t(`Phone number must have ${minDigits}-${maxDigits} digits`, `رقم الهاتف يجب أن يحتوي على ${minDigits}-${maxDigits} أرقام`) });
 
     if (password !== confirmPassword)
-      return ceramists(400).json({ error: t("Passwords don't match", "كلمتا المرور يجب أن تتطابق") });
+      return res.status(400).json({ error: t("Passwords don't match", "كلمتا المرور غير متطابقتين") });
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     if (!passwordRegex.test(password))
-      return res.status(400).json({ error: t("Password must include uppercase, lowercase, number, and symbol", "يجب أن تحتوي كلمة المرور على حرف كبير وصغير ورقم ورمز") });
+      return res.status(400).json({ error: t("Password must include uppercase, lowercase, number, and symbol", "كلمة المرور يجب أن تحتوي على حرف كبير، صغير، رقم، ورمز") });
     console.log(`Validation took ${Date.now() - validateStart}ms`);
 
     // Ensure MongoDB indexes on email, phoneNumber, username
@@ -55,15 +70,15 @@ export const signUp = async (req, res, next) => {
     // Database checks
     const dbStart = Date.now();
     const existingEmail = await User.findOne({ email: normalizedEmail });
-    const existingPhone = await User.findOne({ phoneNumber });
+    const existingPhone = await User.findOne({ phoneNumber: parsedPhone.number });
     const existingUsername = await User.findOne({ username });
     console.log(`Database queries took ${Date.now() - dbStart}ms`);
 
     if (existingEmail)
-      return res.status(409).json({ error: t("Email already in use", "اسم المستخدم أو البريد الإلكتروني مستخدم بالفعل") });
+      return res.status(409).json({ error: t("Email already in use", "البريد الإلكتروني مستخدم بالفعل") });
 
     if (existingPhone)
-      return res.status(409).json({ error: t("Phone Number already in use", "رقم الهاتف مستخدم بالفعل") });
+      return res.status(409).json({ error: t("Phone number already in use", "رقم الهاتف مستخدم بالفعل") });
 
     if (existingUsername)
       return res.status(409).json({ error: t("Username already in use", "اسم المستخدم مستخدم بالفعل") });
@@ -100,7 +115,6 @@ export const signUp = async (req, res, next) => {
     next(error);
   }
 };
-
 export const signUpWithGoogle = async (req, res, next) => {
   const lang = req.query.lang === 'ar' ? 'ar' : 'en';
   const t = (en, ar) => lang === 'ar' ? ar : en;

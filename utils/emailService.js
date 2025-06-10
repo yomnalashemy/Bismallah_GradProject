@@ -1,7 +1,6 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
-import Bull from 'bull';
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
@@ -12,8 +11,6 @@ const transporter = nodemailer.createTransport({
   },
   tls: { rejectUnauthorized: false }
 });
-
-const emailQueue = new Bull('email-queue', { redis: { host: 'localhost', port: 6379 } });
 
 export const sendEmailVerificationLink = async (email, username, token) => {
   const start = Date.now();
@@ -53,26 +50,13 @@ export const sendEmailVerificationLink = async (email, username, token) => {
   };
 
   try {
-    await emailQueue.add({ email, username, token, mailOptions });
-    console.log(`Queued email for ${email} in ${Date.now() - start}ms`);
-  } catch (err) {
-    console.error(`Failed to queue email for ${email}: ${err.message}, time: ${Date.now() - start}ms`);
-    throw err;
-  }
-};
-
-// Process email queue
-emailQueue.process(async (job) => {
-  const { email, mailOptions } = job.data;
-  const start = Date.now();
-  try {
     await transporter.sendMail(mailOptions);
     console.log(`Sent email to ${email} in ${Date.now() - start}ms`);
   } catch (err) {
-    console.error(`Email send failed for ${email}: ${err.message}, time: ${Date.now() - start}ms`);
+    console.error(`Failed to send email to ${email}: ${err.message}, time: ${Date.now() - start}ms`);
     throw err;
   }
-});
+};
 
 export const sendResetPasswordEmail = async (email, username, resetToken) => {
   const resetLink = `https://lupira.onrender.com/api/auth/deeplink?to=reset-password&token=${resetToken}`;
@@ -117,11 +101,11 @@ export const sendEmailChangeVerificationLink = async (email, username, token, la
         <div style="background-color: #6A5ACD; color: #ffffff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
           <h1 style="margin: 0;">${t('Confirm Your New Email', 'تأكيد بريدك الإلكتروني الجديد')}</h1>
         </div>
-        <div style="border: 1px solid #ddd; padding: 30px;">
+        <div style="border: 1px solid #ddd; padding sigilo: 30px;">
           <p>${t('Hello', 'مرحبًا')} <strong>${username}</strong>,</p>
           <p>${t(
             'You recently requested to update your email address on <strong>Lupira</strong>. Please confirm your new email by clicking the button below:',
-            'لقد طلبت مؤخرًا تحديث عنوان بريدك الإلكتروني على <strong>لوبيرا</strong>. يرجى تأكيد بريدك الإلكتروني الجديد بالنقر على الزر أدناه:'
+            'لقد طلبت مؤخرًا تحديث عنوان بريدك الإلكتروني على <strong>لوبيرا</strong> يرجى تأكيد بريدك الإلكتروني الجديد بالنقر على الزر أدناه:'
           )}</p>
           <div style="text-align: center; margin: 30px 0;">
             <a href="${verifyUrl}" style="padding: 12px 24px; background-color: #28a745; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">
@@ -144,3 +128,4 @@ export const sendEmailChangeVerificationLink = async (email, username, token, la
   await transporter.sendMail(mailOptions);
   console.log('Email change verification sent to:', email);
 };
+

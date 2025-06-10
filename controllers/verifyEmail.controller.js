@@ -53,7 +53,7 @@ export const verifyEmail = async (req, res) => {
           </head>
           <body>
             <h2>${t('Your email has been updated successfully!', 'تم تحديث بريدك الإلكتروني بنجاح!')}</h2>
-           District<p><a href="lupira://login">${t('Tap here if nothing happens', 'اضغط هنا إذا لم يحدث شيء')}</a></p>
+            District<p><a href="lupira://login">${t('Tap here if nothing happens', 'اضغط هنا إذا لم يحدث شيء')}</a></p>
           </body>
         </html>
       `);
@@ -102,19 +102,19 @@ export const verifyEmail = async (req, res) => {
         <head>
           <meta charset="UTF-8">
           <title>${t('Email Verified', 'تم التحقق من البريد الإلكتروني')}</title>
-          <script>
-            window.location.href = "lupira://login";
-            setTimeout(() => {
-              document.body.innerHTML = '<h2>${t("If the app didn\\'t open, please make sure it is installed.", "إذا لم يتم فتح التطبيق، يرجى التأكد من أنه مثبت.")}</h2>';
-            }, 3000);
-          </script>
-        </head>
-        <body>
-          <h2>${t('Your email has been verified!', 'تم التحقق من بريدك الإلكتروني!')}</h2>
-          <p><a href="lupira://login">${t('Tap here if nothing happens', 'اضغط هنا إذا لم يحدث شيء')}</a></p>
-        </body>
-      </html>
-    `);
+        <script>
+          window.location.href = "lupira://login";
+          setTimeout(() => {
+            document.body.innerHTML = '<h2>${t("If the app didn\\'t open, please make sure it is installed.", "إذا لم يتم فتح التطبيق، يرجى التأكد من أنه مثبت.")}</h2>';
+          }, 3000);
+        </script>
+      </head>
+      <body>
+        <h2>${t('Your email has been verified!', 'تم التحقق من بريدك الإلكتروني!')}</h2>
+        <p><a href="lupira://login">${t('Tap here if nothing happens', 'اضغط هنا إذا لم يحدث شيء')}</a></p>
+      </body>
+    </html>
+  `);
   } catch (err) {
     console.log('❌ Email verification error:', err);
     if (err.name) console.log('Error name:', err.name);
