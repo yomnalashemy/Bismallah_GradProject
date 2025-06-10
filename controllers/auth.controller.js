@@ -16,7 +16,7 @@ export const signUp = async (req, res, next) => {
 
   try {
     const {
-      seismic,
+     username,
       email,
       password,
       confirmPassword,
