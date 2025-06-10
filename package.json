@@ -13,6 +13,7 @@
     "axios": "^1.9.0",
     "bcryptjs": "^3.0.2",
     "bismallah-grad-project": "file:",
+    "bull": "^4.16.5",
     "cloudinary": "^1.41.3",
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",

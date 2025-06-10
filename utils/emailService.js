@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
+import Bull from 'bull';
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
@@ -11,7 +12,11 @@ const transporter = nodemailer.createTransport({
   },
   tls: { rejectUnauthorized: false }
 });
+
+const emailQueue = new Bull('email-queue', { redis: { host: 'localhost', port: 6379 } });
+
 export const sendEmailVerificationLink = async (email, username, token) => {
+  const start = Date.now();
   const webVerifyUrl = `https://lupira.onrender.com/api/auth/verify-email?token=${encodeURIComponent(token)}`;
   const appDeeplinkFallback = `https://lupira.onrender.com/api/auth/deeplink?to=verify-email&token=${encodeURIComponent(token)}`;
 
@@ -47,9 +52,28 @@ export const sendEmailVerificationLink = async (email, username, token) => {
     `
   };
 
-  await transporter.sendMail(mailOptions);
-  console.log("Verification email sent to:", email);
+  try {
+    await emailQueue.add({ email, username, token, mailOptions });
+    console.log(`Queued email for ${email} in ${Date.now() - start}ms`);
+  } catch (err) {
+    console.error(`Failed to queue email for ${email}: ${err.message}, time: ${Date.now() - start}ms`);
+    throw err;
+  }
 };
+
+// Process email queue
+emailQueue.process(async (job) => {
+  const { email, mailOptions } = job.data;
+  const start = Date.now();
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Sent email to ${email} in ${Date.now() - start}ms`);
+  } catch (err) {
+    console.error(`Email send failed for ${email}: ${err.message}, time: ${Date.now() - start}ms`);
+    throw err;
+  }
+});
+
 export const sendResetPasswordEmail = async (email, username, resetToken) => {
   const resetLink = `https://lupira.onrender.com/api/auth/deeplink?to=reset-password&token=${resetToken}`;
 
@@ -79,6 +103,7 @@ export const sendResetPasswordEmail = async (email, username, resetToken) => {
   await transporter.sendMail(mailOptions);
   console.log("Reset password email sent to:", email);
 };
+
 export const sendEmailChangeVerificationLink = async (email, username, token, lang = 'en') => {
   const verifyUrl = `https://lupira.onrender.com/api/auth/verify-email?token=${encodeURIComponent(token)}&lang=${lang}`;
   const t = (en, ar) => (lang === 'ar' ? ar : en);

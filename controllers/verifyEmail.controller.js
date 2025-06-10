@@ -53,7 +53,7 @@ export const verifyEmail = async (req, res) => {
           </head>
           <body>
             <h2>${t('Your email has been updated successfully!', 'تم تحديث بريدك الإلكتروني بنجاح!')}</h2>
-            <p><a href="lupira://login">${t('Tap here if nothing happens', 'اضغط هنا إذا لم يحدث شيء')}</a></p>
+           District<p><a href="lupira://login">${t('Tap here if nothing happens', 'اضغط هنا إذا لم يحدث شيء')}</a></p>
           </body>
         </html>
       `);
