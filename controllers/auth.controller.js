@@ -38,8 +38,7 @@ export const signUp = async (req, res, next) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(normalizedEmail))
       return res.status(400).json({ error: t("Invalid email format", "صيغة البريد الإلكتروني غير صالحة") });
-    if (!normalizedEmail.endsWith('@gmail.com'))
-      return res.status(400).json({ error: t("Email must be a Gmail address", "البريد الإلكتروني يجب أن يكون من Gmail") });
+    
 
     if (!phoneNumber)
       return res.status(400).json({ error: t("Phone number is required", "رقم الهاتف مطلوب") });
